@@ -42,14 +42,22 @@ describe('retrieveContext', () => {
     expect(r.origin).toBe('local');
   });
 
-  it('va directo a local sin VITE_API_URL', async () => {
+  it('intenta el backend mismo-origen sin VITE_API_URL', async () => {
     vi.stubEnv('VITE_API_URL', '');
-    const fetchSpy = vi.fn();
+    const fetchSpy = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ hits: [HIT] }) });
     vi.stubGlobal('fetch', fetchSpy);
     const { retrieveContext } = await import('../services/ragBackend');
     const r = await retrieveContext('consulta cualquiera');
+    expect(fetchSpy).toHaveBeenCalled();
+    expect(r.origin).toBe('backend');
+  });
+
+  it('cae a local sin VITE_API_URL si el backend falla', async () => {
+    vi.stubEnv('VITE_API_URL', '');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('down')));
+    const { retrieveContext } = await import('../services/ragBackend');
+    const r = await retrieveContext('consulta cualquiera');
     expect(r.origin).toBe('local');
-    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
 
@@ -74,13 +82,13 @@ describe('askCopilot', () => {
     expect(r?.summary).toBe('hola');
   });
 
-  it('devuelve null sin VITE_API_URL', async () => {
+  it('devuelve null si el backend mismo-origen falla', async () => {
     vi.stubEnv('VITE_API_URL', '');
-    const fetchSpy = vi.fn();
+    const fetchSpy = vi.fn().mockRejectedValue(new Error('down'));
     vi.stubGlobal('fetch', fetchSpy);
     const { askCopilot } = await import('../services/ragBackend');
     expect(await askCopilot('hola')).toBeNull();
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).toHaveBeenCalled();
   });
 
   it('devuelve null si el backend falla', async () => {

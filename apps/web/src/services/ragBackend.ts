@@ -1,6 +1,7 @@
 /**
- * Puente RAG documental: backend pgvector/memorias cuando VITE_API_URL
- * apunta al API, RAG local (rapido, sin red) como respaldo automatico.
+ * Puente RAG documental: backend primero (mismo-origen /api/v1 via proxy,
+ * o VITE_API_URL si esta definido), RAG local (rapido, sin red) como
+ * respaldo automatico cuando el backend no responde.
  *
  * Usado por el panel "RAG Documental Ambiental" y por los chats.
  */
@@ -66,9 +67,10 @@ const API_URL = (
   (import.meta.env.VITE_API_URL as string | undefined) || ''
 ).replace(/\/$/, '');
 
-/** Origen del backend para la UI (badge de fuentes). */
+/** Hay backend para intentar: mismo-origen (proxy /api/v1) o VITE_API_URL.
+ *  Cada llamada lo intenta primero y cae a local si falla. */
 export function backendConfigured(): boolean {
-  return API_URL.length > 0;
+  return true;
 }
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
@@ -88,55 +90,47 @@ function toSearchResult(h: BackendHit): SearchResult {
   };
 }
 
-/** Contexto documental: backend primero, local si no hay API o falla. */
+/** Contexto documental: backend primero (mismo-origen si no hay VITE_API_URL),
+ *  local si el backend no responde. */
 export async function retrieveContext(query: string, topK = 3): Promise<RagContextResult> {
-  if (API_URL) {
-    try {
-      const data = await api<{ hits?: BackendHit[] }>('/api/v1/rag/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, top_k: topK }),
-      });
-      const results = (data.hits ?? []).map(toSearchResult);
-      if (results.length > 0) return { results, origin: 'backend' };
-    } catch {
-      // Sin backend a la mano: cae al RAG local sin romper el chat.
-    }
+  try {
+    const data = await api<{ hits?: BackendHit[] }>('/api/v1/rag/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, top_k: topK }),
+    });
+    const results = (data.hits ?? []).map(toSearchResult);
+    if (results.length > 0) return { results, origin: 'backend' };
+  } catch {
+    // Sin backend a la mano: cae al RAG local sin romper el chat.
   }
   return { results: ragService.search(query, topK), origin: 'local' };
 }
 
-/** Pregunta con citas (backend; null si no hay API). */
+/** Pregunta con citas (backend; null si falla o no hay API). */
 export async function askBackend(
   query: string,
   topK = 6,
 ): Promise<{ answer: string; citations: BackendCitation[]; has_source: boolean; provider: string } | null> {
-  if (!API_URL) return null;
-  const data = await api<{
-    answer: string;
-    citations: BackendCitation[];
-    has_source: boolean;
-    provider: string;
-  }>('/api/v1/rag/query', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, top_k: topK }),
-  });
-  return data;
+  try {
+    const data = await api<{
+      answer: string;
+      citations: BackendCitation[];
+      has_source: boolean;
+      provider: string;
+    }>('/api/v1/rag/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, top_k: topK }),
+    });
+    return data;
+  } catch {
+    return null;
+  }
 }
 
-/** Respuesta del copiloto del mapa (backend). */
-export interface BackendCopilot {
-  summary: string;
-  confidence_score: number;
-  metrics: Record<string, unknown>;
-  sources: { title: string; doi_or_url: string; confidence: string }[];
-  suggested_actions: string[];
-}
-
-/** Copiloto del mapa (backend con la llave Groq del servidor; null si no hay API o falla). */
+/** Copiloto del mapa (backend con la llave Groq del servidor; null si falla). */
 export async function askCopilot(query: string): Promise<BackendCopilot | null> {
-  if (!API_URL) return null;
   try {
     return await api<BackendCopilot>('/api/v1/copilot/query', {
       method: 'POST',
@@ -148,15 +142,22 @@ export async function askCopilot(query: string): Promise<BackendCopilot | null> 
   }
 }
 
+/** Respuesta del copiloto del mapa (backend). */
+export interface BackendCopilot {
+  summary: string;
+  confidence_score: number;
+  metrics: Record<string, unknown>;
+  sources: { title: string; doi_or_url: string; confidence: string }[];
+  suggested_actions: string[];
+}
+
 /** Documentos indexados (backend o locales). */
 export async function listDocuments(): Promise<{ docs: BackendDoc[]; origin: RagOrigin }> {
-  if (API_URL) {
-    try {
-      const docs = await api<BackendDoc[]>('/api/v1/rag/documents');
-      return { docs, origin: 'backend' };
-    } catch {
-      // cae a local
-    }
+  try {
+    const docs = await api<BackendDoc[]>('/api/v1/rag/documents');
+    return { docs, origin: 'backend' };
+  } catch {
+    // cae a local
   }
   const docs: BackendDoc[] = ragService.getDocuments().map((d: Document) => ({
     id: d.id,
@@ -170,13 +171,11 @@ export async function listDocuments(): Promise<{ docs: BackendDoc[]; origin: Rag
 
 /** Fuentes oficiales registradas en el backend (o guia local). */
 export async function listSources(): Promise<{ sources: BackendSource[]; origin: RagOrigin }> {
-  if (API_URL) {
-    try {
-      const data = await api<{ sources: BackendSource[] }>('/api/v1/rag/sources');
-      return { sources: data.sources, origin: 'backend' };
-    } catch {
-      // cae a guia local
-    }
+  try {
+    const data = await api<{ sources: BackendSource[] }>('/api/v1/rag/sources');
+    return { sources: data.sources, origin: 'backend' };
+  } catch {
+    // cae a guia local
   }
   return { sources: LOCAL_SOURCES_GUIDE, origin: 'local' };
 }
@@ -188,13 +187,13 @@ const LOCAL_SOURCES_GUIDE: BackendSource[] = [
   { name: 'ONU - Objetivos de Desarrollo Sostenible', kind: 'plan', url: 'https://sdgs.un.org/goals', source: 'ods', notes: 'ODS 3 y 11 para salud y ciudades.' },
 ];
 
-/** Sube un documento (backend o local). Devuelve titulo y chunks. */
+/** Sube un documento (backend primero, local si falla). Devuelve titulo y chunks. */
 export async function uploadDocument(
   file: File,
   source: string,
   kind: string,
 ): Promise<{ title: string; chunks: number; origin: RagOrigin }> {
-  if (API_URL) {
+  try {
     const form = new FormData();
     form.append('file', file);
     form.append('source', source);
@@ -206,20 +205,20 @@ export async function uploadDocument(
     if (!res.ok) throw new Error(`subida fallo: ${res.status}`);
     const data = (await res.json()) as BackendDoc;
     return { title: data.title, chunks: data.chunks, origin: 'backend' };
+  } catch {
+    // cae a local
   }
   const doc = await ragService.addDocument(file);
   return { title: doc.name, chunks: doc.chunks.length, origin: 'local' };
 }
 
-/** Borra un documento (backend o local). */
+/** Borra un documento (backend primero, local si falla). */
 export async function deleteDocument(id: string): Promise<RagOrigin> {
-  if (API_URL) {
-    try {
-      const res = await fetch(`${API_URL}/api/v1/rag/documents/${id}`, { method: 'DELETE' });
-      if (res.ok) return 'backend';
-    } catch {
-      // cae a local
-    }
+  try {
+    const res = await fetch(`${API_URL}/api/v1/rag/documents/${id}`, { method: 'DELETE' });
+    if (res.ok) return 'backend';
+  } catch {
+    // cae a local
   }
   ragService.removeDocument(id);
   return 'local';
