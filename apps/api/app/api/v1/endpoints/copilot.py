@@ -35,23 +35,32 @@ async def query_copilot(req: CopilotQueryRequest):
         {"role": "user", "content": f"Query: {req.query}. Active bounds: {req.bbox}"}
     ]
     
-    completion = await omniroute.complete(messages)
-    
+    try:
+        completion = await omniroute.complete(messages)
+        if str(completion.get("provider", "")) == "mock":
+            raise RuntimeError("sin LLM externo (modo demo local)")
+        summary = str(completion.get("content", ""))
+        engine = str(completion.get("model", "llm"))
+        confidence = 0.92
+    except Exception:
+        # Degradado honesto: nunca 500, el chat del mapa muestra este texto.
+        summary = (
+            "El copiloto IA no esta disponible en este momento (LLM fuera de linea). "
+            "Puedes consultar el panel RAG Documental o reintentar en unos minutos."
+        )
+        engine = "none"
+        confidence = 0.0
+
+    # Sin papers recuperados en este endpoint: lista honesta y vacia.
+    # El chat del mapa adjunta aparte las citas del RAG documental.
     return CopilotQueryResponse(
-        summary=completion["content"],
-        confidence_score=0.92,
+        summary=summary,
+        confidence_score=confidence,
         metrics={
             "analyzed_region_bounds": req.bbox or [-75.65, 6.12, -75.48, 6.38],
-            "dominant_risk": "Moderate Turbidity Runoff",
-            "model_engine": completion["model"]
+            "model_engine": engine
         },
-        sources=[
-            ScientificSource(
-                title="Hydrological Basin Runoff and Water Quality Dynamics",
-                doi_or_url="https://doi.org/10.1016/j.jhydrol.2023.109876",
-                confidence="high"
-            )
-        ],
+        sources=[],
         suggested_actions=[
             "Focus 3D camera on Upper Basin River Station",
             "Enable Sentinel-2 NDVI difference layer"

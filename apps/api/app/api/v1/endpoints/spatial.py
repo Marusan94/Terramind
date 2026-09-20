@@ -37,23 +37,10 @@ async def get_features_by_bbox(
     max_lat: float = Query(90.0, ge=-90.0, le=90.0),
     category: Optional[str] = None
 ):
-    """Retrieves spatial environmental features within a bounding box."""
-    # Seed mock feature for local testing
-    return GeoJSONFeatureCollection(
-        features=[
-            GeoJSONFeature(
-                geometry=GeoJSONGeometry(
-                    type="Point",
-                    coordinates=[-75.574, 6.244]
-                ),
-                properties={
-                    "name": "Estación Tráfico Centro - La Alpujarra",
-                    "category": "water",
-                    "turbidity_ntu": 14.5,
-                    "dissolved_oxygen_mg_l": 5.8,
-                    "ph": 7.1,
-                    "status": "normal"
-                }
-            )
-        ]
-    )
+    """Retrieves spatial environmental features within a bounding box.
+
+    Sin fuente de estaciones en el backend todavia: coleccion honesta y vacia
+    (antes devolvia un punto inventado). Las estaciones reales viven en el
+    frontend (SIATA historico + CAMS) hasta la fase de ingesta hidrometrica.
+    """
+    return GeoJSONFeatureCollection(features=[])

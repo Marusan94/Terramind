@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
   <img src="https://img.shields.io/badge/PostGIS-3.4-336791?style=flat-square&logo=postgresql&logoColor=white" alt="PostGIS" />
-  <img src="https://img.shields.io/badge/tests-8_passing-brightgreen?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/tests-95_passing-brightgreen?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/CI-GitHub_Actions-2088FF?style=flat-square&logo=github-actions&logoColor=white" alt="CI" />
 </p>
 
@@ -46,7 +46,7 @@
 | Frontend | React 18, TypeScript, Vite, Tailwind CSS, Zustand, Recharts, MapLibre GL, deck.gl |
 | Backend | Python, FastAPI, Pydantic v2, enrutamiento multi-LLM |
 | Datos | PostgreSQL + PostGIS, Redis, APIs REST (SIATA, Open-Meteo, RainViewer) |
-| Calidad | Vitest + Testing Library (8 tests), ESLint, GitHub Actions (CI) |
+| Calidad | Vitest + Testing Library (95 tests), pytest backend (35 tests), ESLint, GitHub Actions (CI) |
 | Deploy | Docker, Vercel (frontend), Railway/Fly.io (backend) |
 
 ## ⚡ Uso local (2 minutos, sin backend)
@@ -132,6 +132,14 @@ Apache 2.0 — ver [LICENSE](./LICENSE).
 ## 🙏 Fuentes de datos
 
 **SIATA** (Área Metropolitana del Valle de Aburrá) · **Open-Meteo** · **RainViewer** · **OpenStreetMap** · **MapLibre** · **deck.gl**
+
+## 📚 Biblioteca RAG
+
+Normativa ambiental oficial indexada para el copiloto con citas (`data/rag_library/` — ver `MANIFEST.csv` y `README_INGESTA.md`):
+
+- **Normas**: Decreto 1076/2015, Ley 99/1993, Ley 1333/2009, Res. 631/2015 (vertimientos), Res. 2254/2017 (aire), Res. 627/2006 (ruido), Constitución 1991, Leyes 1931/2018 y 2169/2021 (clima), NTC-ISO 14001, NDC Colombia
+- **Nota**: los PDF de Res. 631/2254 de MinAmbiente son escaneados sin texto; el RAG indexa sus versiones HTML oficiales con texto. NDC 3.0 y E2050 (UNFCCC) requieren descarga manual.
+- **Recarga**: el RAG en memoria se pierde al reiniciar el API — ver comandos de re-ingesta en `data/rag_library/README_INGESTA.md`.
 
 ---
 

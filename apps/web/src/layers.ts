@@ -7,6 +7,7 @@ export interface LayerState {
   weather: boolean;
   water: boolean;
   vegetation: boolean;
+  comunas: boolean;
 }
 
 export const ALL_LAYERS_ON: LayerState = {
@@ -14,6 +15,7 @@ export const ALL_LAYERS_ON: LayerState = {
   weather: true,
   water: true,
   vegetation: true,
+  comunas: true,
 };
 
 export const LAYER_META: Record<keyof LayerState, { label: string; icon: string }> = {
@@ -21,6 +23,7 @@ export const LAYER_META: Record<keyof LayerState, { label: string; icon: string 
   weather: { label: 'Clima y Radar', icon: '🌧' },
   water: { label: 'Niveles de Agua', icon: '💧' },
   vegetation: { label: 'Vegetación', icon: '🌳' },
+  comunas: { label: 'Comunas', icon: '🗺️' },
 };
 
 /** Nombres de pestañas del dashboard por capa. */
@@ -29,4 +32,5 @@ export const LAYER_TABS: Record<keyof LayerState, { key: string; label: string; 
   weather: { key: 'weather', label: '🌧', name: 'Clima' },
   water: { key: 'water', label: '💧', name: 'Agua' },
   vegetation: { key: 'vegetation', label: '🌳', name: 'Vegetación' },
+  comunas: { key: 'territory', label: '🗺️', name: 'Comunas' },
 };

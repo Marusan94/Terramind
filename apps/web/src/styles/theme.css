@@ -325,6 +325,19 @@ html, body {
   overflow: hidden;
 }
 
+/* Con la sidebar colapsada aparece el FAB ☰ en top:12/left:12:
+   se desplaza la tarjeta AQI para que no quede traslapada. */
+.main.full .aqi-overview {
+  left: 60px;
+}
+
+@media (max-width: 768px) {
+  .main.full .aqi-overview {
+    left: 56px;
+    max-width: calc(100vw - 130px);
+  }
+}
+
 /* Map */
 .map {
   position: absolute;

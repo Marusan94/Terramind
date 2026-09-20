@@ -1,0 +1,12 @@
+[
+  {"q": "que dice el informe sobre Itagui", "expect": "informe diario"},
+  {"q": "inversion termica marzo", "expect": "informe diario"},
+  {"q": "ICA naranja grupos sensibles", "expect": "informe diario"},
+  {"q": "metas OMS PM2.5 15", "expect": "oms"},
+  {"q": "PM10 24 horas 45", "expect": "oms"},
+  {"q": "mortalidad contaminacion ODS", "expect": "ODS"},
+  {"q": "transporte publico ciudades sostenibles", "expect": "ODS"},
+  {"q": "pico y placa", "expect": "descontaminacion"},
+  {"q": "indice de calidad del aire ICA", "expect": "2254"},
+  {"q": "niveles maximos permisibles", "expect": "2254"}
+]

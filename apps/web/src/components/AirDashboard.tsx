@@ -9,9 +9,10 @@
 
 import { useState, useEffect } from 'react';
 import { AIR_QUALITY_STATIONS, generateRealisticData, calculateAQI } from '../data/stations';
-import { generateHistoricalData, predictAQI, predictWeekly } from '../services/predictions';
+import { generateHistoricalData, predictAQI, predictWeekly, seriesToHistory } from '../services/predictions';
 import { LayerState, ALL_LAYERS_ON } from '../layers';
 import { ValleyData, ValleyStation } from '../services/valley';
+import IntelligenceTab from './IntelligenceTab';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
@@ -47,7 +48,7 @@ function vulnerabilityLabel(v: number): { label: string; color: string } {
 }
 
 type TabKey =
-  | 'overview' | 'territory' | 'forecast' | 'stations' | 'science'
+  | 'overview' | 'intel' | 'territory' | 'forecast' | 'stations' | 'science'
   | 'weather' | 'water' | 'vegetation' | 'explorer' | 'quality' | 'method';
 
 interface AirDashboardProps {
@@ -89,6 +90,31 @@ function synthSeries(base: number, seed: number): { t: number; pm25: number | nu
   return out;
 }
 
+/** Histórico real SIATA (vía seriesToHistory) de la primera estación con
+ *  ≥12 puntos válidos; null si no hay → histórico demo. */
+function pickHistory(
+  series: Record<string, { t: number; pm25: number | null }[]>,
+): { timestamp: number; aqi: number; pm25: number }[] | null {
+  for (const key of Object.keys(series)) {
+    const h = seriesToHistory(series[key]);
+    if (h) return h;
+  }
+  return null;
+}
+
+/** Serie horaria real SIATA (últimas 24h) si hay ≥12 puntos válidos; si no, null. */
+function pickRealHourly(
+  series: Record<string, { t: number; pm25: number | null }[]>,
+): { t: number; pm25: number | null }[] | null {
+  for (const key of Object.keys(series)) {
+    const s = series[key].slice(-24);
+    if (s.filter(p => p.pm25 != null).length >= 12) {
+      return s.map(p => ({ t: p.t, pm25: p.pm25 }));
+    }
+  }
+  return null;
+}
+
 function downloadCsv(filename: string, rows: string[][]) {
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
@@ -117,6 +143,7 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
   if (layers.airQuality) {
     tabs.push(
       { key: 'overview', label: '📊', name: 'Resumen' },
+      { key: 'intel', label: '🧠', name: 'Inteligencia' },
       { key: 'territory', label: '🗺️', name: 'Territorio' },
       { key: 'forecast', label: '🔮', name: 'Pronóstico' },
       { key: 'stations', label: '📍', name: 'Estaciones' },
@@ -172,9 +199,14 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
     const base = ok.length ? ok : stationsData;
     const avg = (f: (s: any) => number) => Math.round(base.reduce((s: number, d: any) => s + f(d), 0) / base.length);
 
-    const historical = generateHistoricalData();
+    // Pronóstico: serie REAL SIATA cuando hay ≥12 puntos válidos; si no, demo
+    const realHistorical = valley?.series ? pickHistory(valley.series) : null;
+    const historical = realHistorical ?? generateHistoricalData();
+    const forecastReal = realHistorical !== null;
     const predictions = predictAQI(historical);
     const weekly = predictWeekly(historical);
+    const hourly = (valley?.series ? pickRealHourly(valley.series) : null)
+      ?? synthSeries(avg((s: any) => s.pm25), 3);
 
     setData({
       stations: stationsData,
@@ -190,6 +222,8 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
       historical,
       predictions,
       weekly,
+      forecastReal,
+      hourly,
       lastUpdate: new Date(),
       source: valley ? `${valley.source} · ${valley.dataDate}` : 'Simulado (demo)',
     });
@@ -303,17 +337,20 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
 
         <button
           onClick={onClose}
+          aria-label="Cerrar dashboard"
+          title="Cerrar"
           style={{
-            padding: '8px 16px',
+            padding: '8px 12px',
             background: 'var(--bg-2)',
             border: '1px solid var(--border)',
             borderRadius: 'var(--radius)',
             color: 'var(--text-dim)',
             cursor: 'pointer',
-            fontSize: 13,
+            fontSize: 14,
+            lineHeight: 1,
           }}
         >
-          × Cerrar
+          ×
         </button>
       </div>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 14 }}>
@@ -426,6 +463,25 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
       )}
 
       {/* TERRITORY TAB */}
+      {tab === 'intel' && (
+        <IntelligenceTab
+          stations={data.stations.map((s: any) => ({
+            id: s.id,
+            district: s.district,
+            pm25: s.pm25,
+            pm10: s.pm10,
+            o3: s.o3,
+            no2: s.no2,
+            elevation: s.elevation,
+            lat: s.coords[1],
+            lon: s.coords[0],
+          }))}
+          hourly={data.hourly}
+          weather={valley?.weather ?? null}
+          source={data.source}
+        />
+      )}
+
       {tab === 'territory' && (
         <div className="dashboard-grid">
           {/* Bar: AQI per district */}
@@ -550,6 +606,9 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
             <div className="dashboard-card-header">
               <span className="dashboard-card-icon">🔮</span>
               <span>Pronóstico 48 horas</span>
+              <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 400 }}>
+                {data.forecastReal ? '· desde serie real SIATA' : '· serie demo'}
+              </span>
             </div>
             <ResponsiveContainer width="100%" height={170}>
               <LineChart data={chartPred} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
@@ -573,6 +632,9 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
             <div className="dashboard-card-header">
               <span className="dashboard-card-icon">📅</span>
               <span>Pronóstico Semanal</span>
+              <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 400 }}>
+                {data.forecastReal ? '· desde serie real SIATA' : '· serie demo'}
+              </span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {data.weekly.map((day: any, i: number) => {
@@ -733,6 +795,10 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
                   <div className="stat-value">{valley.weather.humidity}%</div>
                   <div className="stat-label">Humedad</div>
                 </div>
+                <div className="stat-item">
+                  <div className="stat-value">{valley.weather.precipProb}%</div>
+                  <div className="stat-label">Prob. lluvia (próx. hora)</div>
+                </div>
                 <div className="stat-item" style={{ gridColumn: 'span 2' }}>
                   <div style={{ fontSize: 15 }}>{valley.weather.emoji} {valley.weather.label}</div>
                   <div className="stat-label">Condición (Open-Meteo)</div>
@@ -743,6 +809,44 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
             )}
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 10 }}>
               El radar de lluvia se ve sobre el mapa (capa Clima activa) · Fuente: RainViewer + Open-Meteo.
+            </div>
+          </div>
+
+          <div className="dashboard-card" style={{ gridColumn: 'span 2' }}>
+            <div className="dashboard-card-header">
+              <span className="dashboard-card-icon">🌧</span>
+              <span>¿Lloverá? — próximas 12 horas (Open-Meteo)</span>
+            </div>
+            {(valley?.weather?.hourly ?? []).length > 0 ? (
+              <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
+                {(valley?.weather?.hourly ?? []).map(h => {
+                  const d = new Date(h.time);
+                  const hh = Number.isNaN(d.getTime())
+                    ? h.time.slice(11, 16)
+                    : `${d.getHours().toString().padStart(2, '0')}:00`;
+                  const wet = h.precipProb >= 40;
+                  return (
+                    <div key={h.time} style={{
+                      minWidth: 56, textAlign: 'center', padding: '6px 4px', borderRadius: 8,
+                      background: wet ? 'rgba(56,189,248,0.15)' : 'var(--bg-3)',
+                      border: wet ? '1px solid #38bdf8' : '1px solid transparent',
+                    }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>{hh}</div>
+                      <div style={{ fontSize: 15, fontWeight: 800, color: wet ? '#38bdf8' : 'var(--text)' }}>
+                        {h.precipProb}%
+                      </div>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{h.precip} mm</div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ fontSize: 13, color: 'var(--text-dim)' }}>
+                Pronóstico horario no disponible (sin conexión a Open-Meteo).
+              </div>
+            )}
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+              ≥40% sombreado azul = lleva sombrilla. La lluvia lava el PM2.5 del aire.
             </div>
           </div>
 
@@ -776,14 +880,21 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
           <div className="dashboard-card" style={{ gridColumn: 'span 3' }}>
             <div className="dashboard-card-header">
               <span className="dashboard-card-icon">💧</span>
-              <span>Niveles de agua — red demo (simulado)</span>
+              <span>Niveles de agua — SIATA Geoportal (en vivo)</span>
             </div>
+            {(valley?.gauges ?? []).some(g => g.alert) && (
+              <div className="badge danger" style={{ marginBottom: 8 }}>
+                ⚠ {(valley?.gauges ?? []).filter(g => g.alert).length} punto(s) sobre el nivel de
+                precaución oficial — revisa la tabla
+              </div>
+            )}
             <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={TH}>Punto</th>
                   <th style={TH}>Cauce</th>
                   <th style={THC}>Nivel (m)</th>
+                  <th style={THC}>Umbral (m)</th>
                   <th style={THC}>Tendencia</th>
                   <th style={THC}>Estado</th>
                 </tr>
@@ -796,12 +907,15 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
                     <td style={{ textAlign: 'center', padding: 8, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
                       {g.level.toFixed(2)}
                     </td>
+                    <td style={{ textAlign: 'center', padding: 8, color: 'var(--text-dim)' }}>
+                      {g.precaution != null ? g.precaution.toFixed(2) : '—'}
+                    </td>
                     <td style={{ textAlign: 'center', padding: 8 }}>
                       {g.trend === 'up' ? '↗ subiendo' : g.trend === 'down' ? '↘ bajando' : '→ estable'}
                     </td>
                     <td style={{ textAlign: 'center', padding: 8 }}>
                       {g.alert
-                        ? <span className="badge danger">⚠ sobre base</span>
+                        ? <span className="badge danger">⚠ sobre precaución</span>
                         : <span className="badge good">normal</span>}
                     </td>
                   </tr>
@@ -809,7 +923,10 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
               </tbody>
             </table>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
-              Red de demostración. La red hidrometeorológica real de SIATA se integrará en la fase de ingesta.
+              Nivel actual vs umbral oficial de precaución del Geoportal SIATA (se actualiza ~cada
+              30 min). 4 puntos: río de sur a norte + Q. La Iguana. En el mapa el marcador se pone
+              rojo al superar el umbral.
+              {(valley?.gauges ?? []).length === 0 && ' Sin datos en este momento.'}
             </div>
           </div>
         </div>
@@ -824,16 +941,31 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
                 <span className="dashboard-card-icon">🌳</span>
                 <span>{p.name}</span>
               </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: p.ndvi > 0.6 ? '#4ade80' : '#eab308' }}>
-                {p.ndvi.toFixed(2)}
-              </div>
-              <div className="stat-label" style={{ marginBottom: 8 }}>NDVI (demo)</div>
-              <div style={{ height: 10, background: 'var(--bg-3)', borderRadius: 5, overflow: 'hidden' }}>
-                <div style={{ width: `${Math.round(p.ndvi * 100)}%`, height: '100%', background: '#22c55e' }} />
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
-                NDVI 0 = sin vegetación · 1 = vegetación densa. Valores de demostración.
-              </div>
+              {p.real && p.ndvi === 0 ? (
+                <>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: '#9ca3af' }}>n/d</div>
+                  <div className="stat-label" style={{ marginBottom: 8 }}>
+                    NDVI pendiente (Copernicus) · ubicación real OSM
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+                    El punto y el nombre son reales. El número de vegetación llega con el satélite;
+                    mientras tanto el círculo del mapa solo marca el área verde.
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: p.ndvi > 0.6 ? '#4ade80' : '#eab308' }}>
+                    {p.ndvi.toFixed(2)}
+                  </div>
+                  <div className="stat-label" style={{ marginBottom: 8 }}>NDVI (demo)</div>
+                  <div style={{ height: 10, background: 'var(--bg-3)', borderRadius: 5, overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.round(p.ndvi * 100)}%`, height: '100%', background: '#22c55e' }} />
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+                    NDVI 0 = sin vegetación · 1 = vegetación densa. Valores de demostración.
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>

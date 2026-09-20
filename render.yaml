@@ -1,0 +1,36 @@
+# Render Blueprint: backend Terramind (plan Free).
+# Uso: dashboard → New → Blueprint → conecta el repo. Luego completa los secrets.
+services:
+  - type: web
+    name: terramind-api
+    runtime: python
+    rootDir: apps/api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: RAG_STORE
+        value: memory
+      - key: RAG_OFFLINE
+        value: "True"
+      - key: RAG_DEMO_SEED
+        value: "True"
+      - key: RAG_AUTO_INGEST
+        value: "True"
+      # Relativa al rootDir (apps/api): la biblioteca viaja en el repo (ver .gitignore)
+      - key: RAG_LIBRARY_DIR
+        value: ../../data/rag_library
+      - key: DEFAULT_LLM_PROVIDER
+        value: groq
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-20b
+      # Secrets (rellenar en el dashboard, sync:false los pide al aplicar el Blueprint)
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false

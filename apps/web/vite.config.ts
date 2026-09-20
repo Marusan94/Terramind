@@ -59,6 +59,26 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/siata/, "")
       },
+      // Geoportal SIATA (niveles en vivo): mismo trato, sin llave.
+      // OJO: va antes de "/api" para que no lo capture el proxy del backend.
+      "/api/geoportal": {
+        target: "https://geoportal.siata.gov.co",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/geoportal/, "")
+      },
+      // Alcaldía de Medellín (comunas oficiales, GeoJSON sin llave).
+      "/api/medellin": {
+        target: "https://www.medellin.gov.co/servidormapas",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/medellin/, "")
+      },
+      // NASA FIRMS (focos de incendio en vivo): requiere VITE_FIRMS_MAP_KEY.
+      // OJO: va antes de "/api" para que no lo capture el proxy del backend.
+      "/api/firms": {
+        target: "https://firms.modaps.eosdis.nasa.gov",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/firms/, "")
+      },
       "/api": {
         target: "http://127.0.0.1:8000",
         changeOrigin: true

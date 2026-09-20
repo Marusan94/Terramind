@@ -49,6 +49,12 @@ docker-compose.override.yml
 .coverage
 htmlcov/
 .pytest_cache/
+apps/web/coverage/
+
+# RAG library: se versionan los PDF/HTML utiles (~9MB) para que el servidor los ingiera al arrancar.
+# Solo se excluyen los 2 PDF escaneados sin texto (inutiles para el RAG; ver MANIFEST.csv).
+data/rag_library/pdf/resolucion-631-de-2015.pdf
+data/rag_library/pdf/Resolucion-2254-de-2017.pdf
 
 # Build
 *.egg

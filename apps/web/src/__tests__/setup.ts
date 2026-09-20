@@ -67,3 +67,17 @@ vi.mock('maplibre-gl', () => ({
     StyleSpecification: {},
   },
 }));
+
+// jsdom sin URL no expone localStorage: stub en memoria para la suite.
+if (typeof globalThis.localStorage === 'undefined') {
+  const memStore = new Map<string, string>();
+  const memStorage: Storage = {
+    get length() { return memStore.size; },
+    clear: () => { memStore.clear(); },
+    getItem: (k: string) => (memStore.has(k) ? (memStore.get(k) as string) : null),
+    key: (i: number) => [...memStore.keys()][i] ?? null,
+    removeItem: (k: string) => { memStore.delete(k); },
+    setItem: (k: string, v: string) => { memStore.set(String(k), String(v)); },
+  };
+  Object.defineProperty(globalThis, 'localStorage', { value: memStorage, writable: true, configurable: true });
+}

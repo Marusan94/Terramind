@@ -10,7 +10,26 @@
 
 import { AIR_QUALITY_STATIONS, generateRealisticData, calculateAQI } from '../data/stations';
 import { loadSiataDataset, QualityFlag } from './siata';
-import { getAirQuality, getCurrentWeather, getWeatherDescription } from './openMeteo';
+import { getAirQuality, getCurrentWeather, getWeatherDescription, getHourlyForecast, HourlyForecast, getAqiCategory } from './openMeteo';
+import { loadHydroGauges, HydroGauge } from './hydro';
+import { loadGreenAreas, GreenArea } from './overpass';
+
+/** Medidores SIATA al formato de la app (sin inventar nada). */
+function toValleyGauges(hydro: HydroGauge[] | null): ValleyGauge[] {
+  return (hydro ?? []).map(g => ({
+    id: g.id,
+    code: `HQ${g.codigo}`,
+    name: g.name,
+    river: g.river,
+    district: g.municipality || 'Valle de Aburrá',
+    lat: g.lat,
+    lon: g.lon,
+    level: Math.round(g.level * 100) / 100,
+    precaution: g.precaution,
+    trend: g.trend,
+    alert: g.alert,
+  }));
+}
 
 export interface ValleyStation {
   id: string;
@@ -37,6 +56,7 @@ export interface ValleyGauge {
   lat: number;
   lon: number;
   level: number; // m
+  precaution?: number | null; // m, umbral oficial SIATA (null si no publicado)
   trend: 'up' | 'down' | 'stable';
   alert: boolean;
 }
@@ -46,8 +66,16 @@ export interface ValleyPark {
   name: string;
   lat: number;
   lon: number;
-  radius: number; // m
-  ndvi: number; // 0-1
+  radius: number; // m (ilustrativo en OSM: tamaño real pendiente)
+  ndvi: number; // 0-1 (demo hasta Copernicus)
+  real: boolean; // true = ubicación y nombre reales de OpenStreetMap
+}
+
+export interface ValleyHour {
+  time: string; // ISO local America/Bogota
+  temp: number; // °C
+  precipProb: number; // 0-100 %
+  precip: number; // mm
 }
 
 export interface ValleyData {
@@ -56,7 +84,7 @@ export interface ValleyData {
   series: Record<string, { t: number; pm25: number | null; flag: QualityFlag }[]>;
   /** "ahora" real vía Open-Meteo CAMS (null si falla) */
   live: { aqi: number; pm25: number } | null;
-  weather: { temp: number; humidity: number; precipProb: number; label: string; emoji: string } | null;
+  weather: { temp: number; humidity: number; precipProb: number; label: string; emoji: string; hourly: ValleyHour[] } | null;
   gauges: ValleyGauge[];
   parks: ValleyPark[];
   source: string;
@@ -78,7 +106,24 @@ function latestValid(samples: { t: number; value: number | null; flag: QualityFl
   return null;
 }
 
+/** PRNG determinista: el demo no salta con cada refresh (semilla = día actual). */
+function daySeededRand(seed: number): () => number {
+  let a = seed | 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function demoRand(): () => number {
+  const d = new Date();
+  return daySeededRand(d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate());
+}
+
 function demoGauges(): ValleyGauge[] {
+  const rand = demoRand();
   const defs = [
     { id: 'g-acevedo', name: 'Puente Acevedo', river: 'Río Medellín', lat: 6.30, lon: -75.56, base: 1.8 },
     { id: 'g-moravia', name: 'Moravia', river: 'Río Medellín', lat: 6.27, lon: -75.57, base: 2.1 },
@@ -86,8 +131,8 @@ function demoGauges(): ValleyGauge[] {
     { id: 'g-iguana', name: 'La Iguana', river: 'Q. La Iguana', lat: 6.26, lon: -75.60, base: 0.7 },
   ];
   return defs.map(d => {
-    const level = Math.round((d.base + (Math.random() - 0.5) * 0.4) * 100) / 100;
-    const r = Math.random();
+    const level = Math.round((d.base + (rand() - 0.5) * 0.4) * 100) / 100;
+    const r = rand();
     return {
       ...d,
       level,
@@ -98,12 +143,31 @@ function demoGauges(): ValleyGauge[] {
 }
 
 function demoParks(): ValleyPark[] {
+  const rand = demoRand();
   return [
-    { id: 'p-volador', name: 'Cerro El Volador', lat: 6.270, lon: -75.582, radius: 900, ndvi: 0.62 },
-    { id: 'p-nutibara', name: 'Cerro Nutibara', lat: 6.236, lon: -75.580, radius: 600, ndvi: 0.55 },
-    { id: 'p-arvi', name: 'Parque Arví', lat: 6.280, lon: -75.500, radius: 2500, ndvi: 0.81 },
-    { id: 'p-picacho', name: 'Cerro El Picacho', lat: 6.305, lon: -75.560, radius: 800, ndvi: 0.58 },
-  ].map(p => ({ ...p, ndvi: Math.round((p.ndvi + (Math.random() - 0.5) * 0.06) * 100) / 100 }));
+    { id: 'p-volador', name: 'Cerro El Volador', lat: 6.270, lon: -75.582, radius: 900, ndvi: 0.62, real: false },
+    { id: 'p-nutibara', name: 'Cerro Nutibara', lat: 6.236, lon: -75.580, radius: 600, ndvi: 0.55, real: false },
+    { id: 'p-arvi', name: 'Parque Arví', lat: 6.280, lon: -75.500, radius: 2500, ndvi: 0.81, real: false },
+    { id: 'p-picacho', name: 'Cerro El Picacho', lat: 6.305, lon: -75.560, radius: 800, ndvi: 0.58, real: false },
+  ].map(p => ({ ...p, ndvi: Math.round((p.ndvi + (rand() - 0.5) * 0.06) * 100) / 100 }));
+}
+
+/** Parques/bosques/quebradas reales OSM. null si no hay red. */
+function toValleyParks(green: GreenArea[] | null): ValleyPark[] | null {
+  if (!green || !green.length) return null;
+  const radiusByKind = { parque: 500, bosque: 1200, quebrada: 300 };
+  const ordered = [...green].sort((a, b) =>
+    (a.kind === 'quebrada' ? 1 : 0) - (b.kind === 'quebrada' ? 1 : 0),
+  );
+  return ordered.slice(0, 16).map(g => ({
+    id: g.id,
+    name: g.name,
+    lat: g.lat,
+    lon: g.lon,
+    radius: radiusByKind[g.kind],
+    ndvi: 0,
+    real: true,
+  }));
 }
 
 function simulatedValley(): ValleyData {
@@ -132,13 +196,68 @@ function simulatedValley(): ValleyData {
   };
 }
 
+/** Promedio de AQI por municipio a partir de estaciones con dato válido.
+ *  avgAqi null = ninguna estación del municipio reporta (se pinta s/d, no 0). */
+export interface DistrictAvg {
+  district: string;
+  lat: number;
+  lon: number;
+  avgAqi: number | null;
+  valid: number;
+  total: number;
+  color: string;
+  category: string;
+}
+
+export function aggregateByDistrict(stations: ValleyStation[]): DistrictAvg[] {
+  const by = new Map<string, ValleyStation[]>();
+  stations.forEach(s => {
+    const list = by.get(s.district) ?? [];
+    list.push(s);
+    by.set(s.district, list);
+  });
+  return [...by.entries()].map(([district, list]) => {
+    const valid = list.filter(s => s.quality !== 'MISSING');
+    const lat = list.reduce((a, s) => a + s.lat, 0) / list.length;
+    const lon = list.reduce((a, s) => a + s.lon, 0) / list.length;
+    if (!valid.length) {
+      return { district, lat, lon, avgAqi: null, valid: 0, total: list.length, color: '#6b7280', category: 'Sin datos' };
+    }
+    const avgAqi = Math.round(valid.reduce((a, s) => a + s.aqi, 0) / valid.length);
+    const cat = getAqiCategory(avgAqi);
+    return { district, lat, lon, avgAqi, valid: valid.length, total: list.length, color: cat.color, category: cat.label };
+  });
+}
+
+/** Próximas `hours` horas de lluvia real Open-Meteo. Vacío si no hay red. Exportado para tests. */
+export function toValleyHourly(h: HourlyForecast | null, hours = 12): ValleyHour[] {
+  if (!h || !Array.isArray(h.time)) return [];
+  const out: ValleyHour[] = [];
+  const n = Math.min(hours, h.time.length);
+  for (let i = 0; i < n; i++) {
+    out.push({
+      time: h.time[i],
+      temp: Math.round((h.temperature?.[i] ?? 0) * 10) / 10,
+      precipProb: Math.max(0, Math.min(100, Math.round(h.precipitationProbability?.[i] ?? 0))),
+      precip: Math.max(0, Math.round((h.precipitation?.[i] ?? 0) * 10) / 10),
+    });
+  }
+  return out;
+}
+
 /** Carga todo en paralelo; ante cualquier fallo cae a simulado (nunca rompe). */
 export async function loadValleyData(): Promise<ValleyData> {
-  const [siata, live, weather] = await Promise.all([
+  const [siata, live, weather, hydro, green, hourly] = await Promise.all([
     loadSiataDataset().catch(() => null),
     getAirQuality(6.247, -75.567).then(a => ({ aqi: a.usAqi, pm25: a.pm2_5 })).catch(() => null),
     getCurrentWeather(6.247, -75.567).catch(() => null),
+    loadHydroGauges().then(h => h.gauges).catch(() => null),
+    loadGreenAreas().catch(() => null),
+    getHourlyForecast(6.247, -75.567, 24).catch(() => null),
   ]);
+  const parks = toValleyParks(green) ?? demoParks();
+  const valleyHourly = toValleyHourly(hourly);
+  const nextProb = valleyHourly[0]?.precipProb ?? 0;
 
   if (!siata || siata.stations.length === 0) {
     const sim = simulatedValley();
@@ -147,10 +266,16 @@ export async function loadValleyData(): Promise<ValleyData> {
       const w = getWeatherDescription(weather.weatherCode);
       sim.weather = {
         temp: weather.temperature, humidity: weather.humidity,
-        precipProb: 0, label: w.label, emoji: w.emoji,
+        precipProb: nextProb, label: w.label, emoji: w.emoji, hourly: valleyHourly,
       };
     }
     if (live || weather) sim.source = 'Open-Meteo + Simulado (SIATA no disponible)';
+    if (hydro) {
+      sim.gauges = toValleyGauges(hydro);
+      sim.source += ' + SIATA Geoportal (niveles)';
+    }
+    sim.parks = parks;
+    if (green?.length) sim.source += ' + OSM (parques reales)';
     return sim;
   }
 
@@ -185,6 +310,7 @@ export async function loadValleyData(): Promise<ValleyData> {
     ? 'sep-2024'
     : `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 
+  const hydroLabel = hydro ? ' + SIATA Geoportal (niveles)' : '';
   return {
     stations,
     series,
@@ -194,13 +320,13 @@ export async function loadValleyData(): Promise<ValleyData> {
           const w = getWeatherDescription(weather.weatherCode);
           return {
             temp: weather.temperature, humidity: weather.humidity,
-            precipProb: 0, label: w.label, emoji: w.emoji,
+            precipProb: nextProb, label: w.label, emoji: w.emoji, hourly: valleyHourly,
           };
         })()
       : null,
-    gauges: demoGauges(),
-    parks: demoParks(),
-    source: live ? 'SIATA (histórico) + Open-Meteo CAMS (actual)' : 'SIATA (histórico sep-2024)',
+    gauges: toValleyGauges(hydro),
+    parks,
+    source: (live ? 'SIATA (histórico) + Open-Meteo CAMS (actual)' : 'SIATA (histórico sep-2024)') + hydroLabel + (green?.length ? ' + OSM (parques reales)' : ' · parques/NDVI demo'),
     dataDate: `histórico ${dataDate}`,
     updatedAt: Date.now(),
     quality: { valid: siata.validCount, missing: siata.missingCount, simulated: 0 },

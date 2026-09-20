@@ -31,12 +31,6 @@ export const basemaps: Record<string, BasemapSource> = {
     attribution: '© Stadia, © OpenStreetMap',
     requiresKey: false,
   },
-  maptilerStreets: {
-    name: 'MapTiler Streets',
-    url: 'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=fake',
-    attribution: '© MapTiler, © OpenStreetMap',
-    requiresKey: false,
-  },
 };
 
 /**

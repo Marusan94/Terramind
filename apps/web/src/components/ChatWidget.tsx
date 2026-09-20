@@ -4,6 +4,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { ragService, initializeSampleDocuments, SearchResult } from '../services/rag';
+import { askCopilot, backendConfigured, retrieveContext } from '../services/ragBackend';
 
 const OPENROUTER_KEY = (import.meta.env.VITE_OPENROUTER_API_KEY as string | undefined) || undefined;
 const GEMINI_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined) || undefined;
@@ -250,6 +251,7 @@ interface Message {
   sources?: SearchResult[];
   error?: boolean;
   download?: { filename: string; mime: string };
+  via?: string;
 }
 
 interface AirSnapshot {
@@ -266,6 +268,37 @@ Datos actuales: AQI ${d?.aqi || '--'}, PM2.5 ${d?.pm25 || '--'} µg/m³
 ¿En qué puedo ayudarte?`;
 }
 
+interface ChatPos {
+  left: number;
+  top: number;
+}
+
+const CHAT_POS_KEY = 'terramind-chat-pos';
+
+/** Constriñe la posición al viewport para que el widget nunca se pierda. */
+export function clampChatPos(p: ChatPos, w = 380, h = 120): ChatPos {
+  const vw = window.innerWidth || 1024;
+  const vh = window.innerHeight || 768;
+  const maxLeft = Math.max(8, vw - Math.min(w, vw - 16));
+  const maxTop = Math.max(8, vh - Math.max(h, 70));
+  return {
+    left: Math.min(Math.max(8, Math.round(p.left)), maxLeft),
+    top: Math.min(Math.max(8, Math.round(p.top)), maxTop),
+  };
+}
+
+export function loadChatPos(): ChatPos | null {
+  try {
+    const raw = localStorage.getItem(CHAT_POS_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as Partial<ChatPos>;
+    if (typeof p.left !== 'number' || typeof p.top !== 'number') return null;
+    return clampChatPos({ left: p.left, top: p.top });
+  } catch {
+    return null;
+  }
+}
+
 export default function ChatWidget({ 
   airQualityData,
 }: { 
@@ -279,7 +312,7 @@ export default function ChatWidget({
     live?: { aqi: number; pm25: number };
   };
 }) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -292,9 +325,14 @@ export default function ChatWidget({
   const [documents, setDocuments] = useState<any[]>([]);
   const [showDocs, setShowDocs] = useState(false);
   const [pendingGen, setPendingGen] = useState<GeneratorKind | null>(null);
-  const [dragged, setDragged] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  // Posición persistente: null = anclado abajo-derecha (CSS por defecto)
+  const [pos, setPos] = useState<ChatPos | null>(loadChatPos);
   const widgetRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+  const dragRef = useRef<{
+    startX: number; startY: number; origLeft: number; origTop: number; moved: boolean;
+  } | null>(null);
+  const suppressToggleClick = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -317,41 +355,98 @@ export default function ChatWidget({
     ));
   }, [snapAqi, snapPm25]);
 
-  // Drag the whole widget by its header
+  // Arrastre unificado: funciona con el panel abierto (header) y con el
+  // botón flotante (chat minimizado). Umbral anti-click y guardado al soltar.
   useEffect(() => {
-    if (!dragged) return;
+    if (!dragging) return;
     const move = (e: MouseEvent) => {
       const d = dragRef.current;
       const el = widgetRef.current;
       if (!d || !el) return;
-      el.style.left = `${d.origX + e.clientX - d.startX}px`;
-      el.style.top = `${d.origY + e.clientY - d.startY}px`;
-      el.style.right = 'auto';
-      el.style.bottom = 'auto';
+      if (Math.abs(e.clientX - d.startX) + Math.abs(e.clientY - d.startY) > 4) d.moved = true;
+      const rect = el.getBoundingClientRect();
+      setPos(clampChatPos(
+        { left: d.origLeft + e.clientX - d.startX, top: d.origTop + e.clientY - d.startY },
+        rect.width || 380,
+        rect.height || 120,
+      ));
     };
-    const up = () => setDragged(false);
+    const up = () => {
+      if (dragRef.current?.moved) {
+        // Fue arrastre, no click: evita que el toggle abra/cierre y guarda
+        suppressToggleClick.current = true;
+        window.setTimeout(() => { suppressToggleClick.current = false; }, 0);
+        setPos(prev => {
+          if (prev) {
+            try {
+              localStorage.setItem(CHAT_POS_KEY, JSON.stringify(prev));
+            } catch {
+              // sin almacenamiento: la posición igual aplica en sesión
+            }
+          }
+          return prev;
+        });
+      }
+      dragRef.current = null;
+      setDragging(false);
+    };
     window.addEventListener('mousemove', move);
     window.addEventListener('mouseup', up);
     return () => {
       window.removeEventListener('mousemove', move);
       window.removeEventListener('mouseup', up);
     };
-  }, [dragged]);
+  }, [dragging]);
 
-  const onHeaderMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.chat-close')) return;
+  // Re-constreñir si el viewport cambia (la posición guardada puede quedar fuera)
+  useEffect(() => {
+    const onResize = () => setPos(prev => (prev ? clampChatPos(prev) : prev));
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const beginDrag = (e: React.MouseEvent) => {
     const el = widgetRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: rect.left, origY: rect.top };
-    setDragged(true);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origLeft: pos ? pos.left : rect.left,
+      origTop: pos ? pos.top : rect.top,
+      moved: false,
+    };
+    setDragging(true);
     e.preventDefault();
   };
+
+  const onHeaderMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('.chat-close')) return;
+    beginDrag(e);
+  };
+
+  const onToggleMouseDown = (e: React.MouseEvent) => {
+    beginDrag(e);
+  };
+
+  const onToggleClick = () => {
+    if (suppressToggleClick.current) {
+      suppressToggleClick.current = false;
+      return;
+    }
+    setIsOpen(v => !v);
+  };
+
+  // Si el widget quedó arriba, el panel abre hacia abajo para no salirse
+  const panelBelow = pos !== null && pos.top < 480;
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    if (!GEMINI_KEY && !GROQ_KEY && !OPENROUTER_KEY) {
+    const gen0: GeneratorKind | null = pendingGen;
+    const hasDirectKeys = Boolean(GEMINI_KEY || GROQ_KEY || OPENROUTER_KEY);
+    // Sin keys directas solo el backend puede responder (y no genera formatos).
+    if (!hasDirectKeys && !(backendConfigured() && !gen0)) {
       console.error('Terramind: ninguna API key configurada (VITE_GEMINI_API_KEY, VITE_GROQ_API_KEY o VITE_OPENROUTER_API_KEY).');
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
@@ -367,7 +462,7 @@ export default function ChatWidget({
       role: 'user',
       content: input.trim(),
     };
-    const gen = pendingGen;
+    const gen = gen0;
     setPendingGen(null);
 
     setMessages(prev => [...prev, userMessage]);
@@ -378,11 +473,11 @@ export default function ChatWidget({
     setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
 
     try {
-      const searchResults = ragService.search(userMessage.content, 3);
+      const { results: searchResults, origin: ragOrigin } = await retrieveContext(userMessage.content, 3);
 
       let ragContext = '';
       if (searchResults.length > 0) {
-        ragContext = '\n\n**Documentos cargados:**\n';
+        ragContext = ragOrigin === 'backend' ? '\n\n**Base documental Terramind (SIATA + oficiales):**\n' : '\n\n**Documentos cargados:**\n';
         searchResults.forEach((result, i) => {
           ragContext += `${i + 1}. ${result.chunk}\n`;
         });
@@ -406,7 +501,34 @@ export default function ChatWidget({
         ? `${GENERATORS[gen].system}${airContext}${ragContext}`
         : `${SYSTEM_PROMPT}${airContext}${ragContext}\n\n**Pregunta:** ${userMessage.content}`;
 
-      // Cadena de intentos: Gemini → Groq → OpenRouter (solo proveedores con key).
+      // Vía 1: backend Terramind (la llave Groq vive en el servidor,
+      // nada que configurar en el navegador). Solo preguntas normales:
+      // los generadores necesitan su formato propio.
+      if (!gen && backendConfigured()) {
+        try {
+          const cop = await askCopilot(`${userMessage.content}${airContext}${ragContext}`);
+          if (cop && cop.summary) {
+            const engine =
+              typeof cop.metrics?.model_engine === 'string' ? cop.metrics.model_engine : 'backend';
+            setMessages(prev => prev.map(m =>
+              m.id === assistantId
+                ? {
+                    ...m,
+                    content: cop.summary,
+                    sources: searchResults.length > 0 ? searchResults : undefined,
+                    via: `vía backend · ${engine}`,
+                  }
+                : m
+            ));
+            setIsLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.warn('Terramind: backend no respondió, intento directo:', e);
+        }
+      }
+
+      // Vía 2: proveedores directos (solo los que tienen key en el navegador).
       // Si la key de un proveedor es rechazada (400/401/403), se salta el resto
       // de sus modelos y se pasa al siguiente proveedor.
       const attempts: Attempt[] = [];
@@ -486,6 +608,22 @@ export default function ChatWidget({
         }
       } // fin for (const attempt of attempts)
 
+      // Vía 3 (último recurso): extractivo con los fragmentos del RAG.
+      if (!succeeded && !gen && searchResults.length > 0) {
+        const parts = searchResults.slice(0, 3).map((r, i) => `${r.chunk} [${i + 1}]`);
+        setMessages(prev => prev.map(m =>
+          m.id === assistantId
+            ? {
+                ...m,
+                content: `Esto dicen tus documentos:\n\n${parts.join('\n\n')}`,
+                sources: searchResults,
+                via: 'extractivo local',
+              }
+            : m
+        ));
+        succeeded = true;
+      }
+
       if (!succeeded) {
         throw lastError instanceof Error ? lastError : new Error('All providers failed');
       }
@@ -549,9 +687,16 @@ export default function ChatWidget({
   };
 
   return (
-    <div className="chat-widget" ref={widgetRef}>
+    <div
+      className="chat-widget"
+      ref={widgetRef}
+      style={pos ? { left: pos.left, top: pos.top, right: 'auto', bottom: 'auto' } : undefined}
+    >
       {/* Chat Panel */}
-      <div className={`chat-panel ${isOpen ? '' : 'hidden'}`}>
+      <div
+        className={`chat-panel ${isOpen ? '' : 'hidden'}`}
+        style={panelBelow ? { top: 70, bottom: 'auto' } : undefined}
+      >
         {/* Header */}
         <div className="chat-header" onMouseDown={onHeaderMouseDown} title="Arrastra para mover">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -647,6 +792,9 @@ export default function ChatWidget({
         <div className="chat-messages">
           {messages.map(msg => (
             <div key={msg.id} className={`chat-message ${msg.role} ${msg.error ? 'error' : ''}`}>
+              {msg.via && (
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4 }}>{msg.via}</div>
+              )}
               {msg.content}
               {msg.download && msg.content && !msg.error && (
                 <div style={{ marginTop: 8 }}>
@@ -760,8 +908,9 @@ export default function ChatWidget({
       {/* Toggle Button */}
       <button
         className={`chat-toggle ${isOpen ? 'active' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
-        title={isOpen ? 'Cerrar chat' : 'Abrir chat'}
+        onClick={onToggleClick}
+        onMouseDown={onToggleMouseDown}
+        title={isOpen ? 'Cerrar chat (arrastra para mover)' : 'Abrir chat (arrastra para mover)'}
       >
         💬
       </button>

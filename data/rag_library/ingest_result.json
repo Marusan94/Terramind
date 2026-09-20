@@ -1,0 +1,95 @@
+[
+  {
+    "file": "decreto_1076_2015.pdf",
+    "status": "ok",
+    "id": "b1e5d3f1-3eb2-4865-8701-155c87e5933b",
+    "title": "Decreto 1076 de 2015 - Decreto Unico Reglamentario Sector Ambiente",
+    "source": "gobierno",
+    "kind": "norma",
+    "chunks": 4899
+  },
+  {
+    "file": "ley-99-1993.pdf",
+    "status": "ok",
+    "id": "6e775437-4d93-4112-9f20-70ed31b56aea",
+    "title": "Ley 99 de 1993 - Crea Ministerio de Ambiente y SINA",
+    "source": "gobierno",
+    "kind": "norma",
+    "chunks": 326
+  },
+  {
+    "file": "Ley_1333_de_2009.pdf",
+    "status": "ok",
+    "id": "0332fa17-3e69-4cb0-b59b-bc605d4390a3",
+    "title": "Ley 1333 de 2009 - Regimen Sancionatorio Ambiental",
+    "source": "gobierno",
+    "kind": "norma",
+    "chunks": 108
+  },
+  {
+    "file": "resolucion-631-de-2015.pdf",
+    "status": "fail",
+    "code": 422,
+    "detail": "{\"detail\":\"no se extrajo texto (PDF escaneado sin OCR?)\"}"
+  },
+  {
+    "file": "Resolucion-2254-de-2017.pdf",
+    "status": "fail",
+    "code": 422,
+    "detail": "{\"detail\":\"no se extrajo texto (PDF escaneado sin OCR?)\"}"
+  },
+  {
+    "file": "Resolucion-0627-de-2006.pdf",
+    "status": "ok",
+    "id": "67084e19-6b74-4c19-b832-5bc02a3d4618",
+    "title": "Resolucion 627 de 2006 - Ruido y ruido ambiental",
+    "source": "gobierno",
+    "kind": "norma",
+    "chunks": 145
+  },
+  {
+    "file": "constitucion_politica.pdf",
+    "status": "ok",
+    "id": "f011af2b-c46c-46b2-b4e0-96a27e92c883",
+    "title": "Constitucion Politica de Colombia 1991 - Derecho al ambiente sano",
+    "source": "gobierno",
+    "kind": "norma",
+    "chunks": 664
+  },
+  {
+    "file": "NTC-ISO-14001-2015.pdf",
+    "status": "ok",
+    "id": "c551b4ef-a010-4f49-acc4-c5cbc1575982",
+    "title": "NTC-ISO 14001 de 2015 - Sistemas de gestion ambiental",
+    "source": "otro",
+    "kind": "norma",
+    "chunks": 257
+  },
+  {
+    "file": "ley_1931_2018.htm",
+    "status": "ok",
+    "id": "3bfd7679-ce47-4835-a451-b4f817c6eb9f",
+    "title": "Ley 1931 de 2018 - Gestion del cambio climatico",
+    "source": "gobierno",
+    "kind": "norma",
+    "chunks": 106
+  },
+  {
+    "file": "ley_2169_2021.htm",
+    "status": "ok",
+    "id": "04036b0c-376d-4886-89a8-8bdae04078c4",
+    "title": "Ley 2169 de 2021 - Carbono neutralidad y resiliencia climatica",
+    "source": "gobierno",
+    "kind": "norma",
+    "chunks": 175
+  },
+  {
+    "file": "ndc_minambiente.htm",
+    "status": "ok",
+    "id": "3e49821c-d31a-46a7-bc06-48e77c5a340f",
+    "title": "NDC Colombia - Actualizacion MinAmbiente",
+    "source": "gobierno",
+    "kind": "plan",
+    "chunks": 23
+  }
+]

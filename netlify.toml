@@ -1,0 +1,18 @@
+# Netlify: frontend Terramind (reemplaza el deploy del sitio existente).
+# IMPORTANTE: define VITE_API_URL en el dashboard (Site settings → Environment
+# variables) ANTES de desplegar, porque Vite la hornea en el build.
+[build]
+  base = "apps/web"
+  command = "npm run build"
+  publish = "apps/web/dist"
+
+# SPA: todas las rutas sirven index.html (MapLibre + panel /rag)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

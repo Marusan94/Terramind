@@ -16,7 +16,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { AIR_QUALITY_STATIONS, generateRealisticData, calculateAQI } from '../data/stations';
 import { getTerrainSource, getBuildingsSource, getBuildingsLayer } from '../services/basemaps';
 import { LayerState, ALL_LAYERS_ON } from '../layers';
-import { ValleyStation, ValleyGauge, ValleyPark, ValleyData } from '../services/valley';
+import { latestRadarTileUrl } from '../services/radar';
+import { loadComunas, loadComunaTemps, assignComunaAqi, ComunaFeature } from '../services/comunas';
+import { ValleyStation, ValleyGauge, ValleyPark, ValleyData, aggregateByDistrict } from '../services/valley';
 
 interface StationData {
   name: string;
@@ -25,6 +27,7 @@ interface StationData {
   aqi: number;
   category: string;
   color: string;
+  quality: 'VALID' | 'MISSING' | 'SIMULATED';
   pm25: number;
   pm10: number;
   o3: number;
@@ -39,6 +42,19 @@ interface AirMapProps {
   gauges?: ValleyGauge[];
   parks?: ValleyPark[];
   weather?: ValleyData['weather'];
+  smoke?: SmokePlume[];
+  /** true = focos observados NASA FIRMS; false = demo etiquetado. */
+  smokeReal?: boolean;
+  mixingLabel?: string | null;
+}
+
+/** Foco de humo + trayectoria de adveccion para el mapa. */
+export interface SmokePlume {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+  path: { lat: number; lon: number }[];
 }
 
 /** Tarjeta de stats al pasar sobre una estación. Estilos en línea para que
@@ -51,15 +67,20 @@ function stationCardHtml(d: StationData): string {
     `<div style="font-weight:700;font-size:13px;color:#ffffff">${d.district}</div>` +
     `<div style="font-size:11px;color:#999999;margin:2px 0 8px">${d.name} · ${d.elevation} m</div>` +
     `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">` +
-    `<div style="width:42px;height:42px;border-radius:50%;background:${d.color};display:flex;` +
-    `align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#ffffff">${d.aqi}</div>` +
-    `<div style="font-weight:700;color:${d.color}">${d.category}</div></div>` +
-    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:11px;color:#bbbbbb">` +
-    `<div>PM2.5 <strong style="color:#ffffff">${d.pm25}</strong></div>` +
-    `<div>PM10 <strong style="color:#ffffff">${d.pm10}</strong></div>` +
-    `<div>O₃ <strong style="color:#ffffff">${d.o3}</strong></div>` +
-    `<div>NO₂ <strong style="color:#ffffff">${d.no2}</strong></div>` +
-    `</div></div>`
+    (d.quality === 'MISSING'
+      ? `<div style="font-weight:700;color:#9ca3af">s/d · sin datos recientes</div></div>` +
+        `<div style="font-size:11px;color:#bbbbbb">SIATA no reporta datos recientes para esta estación. ` +
+        `No es aire limpio: es ausencia de medición.</div>`
+      : `<div style="width:42px;height:42px;border-radius:50%;background:${d.color};display:flex;` +
+        `align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#ffffff">${d.aqi}</div>` +
+        `<div style="font-weight:700;color:${d.color}">${d.category}</div></div>` +
+        `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:11px;color:#bbbbbb">` +
+        `<div>PM2.5 <strong style="color:#ffffff">${d.pm25}</strong></div>` +
+        `<div>PM10 <strong style="color:#ffffff">${d.pm10}</strong></div>` +
+        `<div>O₃ <strong style="color:#ffffff">${d.o3}</strong></div>` +
+        `<div>NO₂ <strong style="color:#ffffff">${d.no2}</strong></div>` +
+        `</div>`) +
+    `</div>`
   );
 }
 
@@ -80,8 +101,9 @@ function toStationData(list: ValleyStation[] | undefined): StationData[] {
       district: s.district,
       elevation: s.elevation,
       aqi: s.aqi,
-      category: s.category,
-      color: s.color,
+      category: s.quality === 'MISSING' ? 'Sin datos' : s.category,
+      color: s.quality === 'MISSING' ? '#6b7280' : s.color,
+      quality: s.quality,
       pm25: s.pm25,
       pm10: s.pm10,
       o3: s.o3,
@@ -99,6 +121,7 @@ function toStationData(list: ValleyStation[] | undefined): StationData[] {
       aqi: aqiInfo.aqi,
       category: aqiInfo.category,
       color: aqiInfo.color,
+      quality: 'SIMULATED' as const,
       pm25: data.pm25,
       pm10: data.pm10,
       o3: data.o3,
@@ -117,6 +140,9 @@ const AirMap = memo(function AirMap({
   gauges = [],
   parks = [],
   weather = null,
+  smoke = [],
+  smokeReal = false,
+  mixingLabel = null,
 }: AirMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -132,6 +158,7 @@ const AirMap = memo(function AirMap({
   const airGroup = useRef<maplibregl.Marker[]>([]);
   const waterGroup = useRef<maplibregl.Marker[]>([]);
   const vegGroup = useRef<maplibregl.Marker[]>([]);
+  const smokeGroup = useRef<maplibregl.Marker[]>([]);
 
   const [coords, setCoords] = useState({ lat: 6.247, lon: -75.567, zoom: 11 });
   const [coordsVisible, setCoordsVisible] = useState(false);
@@ -170,9 +197,12 @@ const AirMap = memo(function AirMap({
         border:3px solid #000;box-shadow:0 0 12px ${data.color}80,0 2px 8px rgba(0,0,0,0.5);
         display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;
         color:white;transition:transform 0.2s;`;
-      dot.textContent = String(data.aqi);
+      dot.textContent = data.quality === 'MISSING' ? 's/d' : String(data.aqi);
+      if (data.quality === 'MISSING') dot.style.fontSize = '10px';
       el.appendChild(dot);
-      el.title = `${data.name}\n${data.category}\nPM2.5: ${data.pm25} µg/m³`;
+      el.title = data.quality === 'MISSING'
+        ? `${data.name}\nSin datos recientes (SIATA no reporta)`
+        : `${data.name}\n${data.category}\nPM2.5: ${data.pm25} µg/m³`;
 
       el.addEventListener('mouseenter', () => {
         dot.style.transform = 'scale(1.3)';
@@ -202,6 +232,24 @@ const AirMap = memo(function AirMap({
           .addTo(map)
       );
     });
+    // Promedio por municipio: píldora ⌀ en el centroide, desplazada al norte
+    // para no tapar el marcador. s/d gris si nadie reporta (nunca 0).
+    aggregateByDistrict(dataRef.current.stations ?? []).forEach(d => {
+      const pill = document.createElement('div');
+      pill.style.cssText = `
+        padding:2px 8px;border-radius:10px;background:${d.color};border:2px solid #000;
+        font-weight:800;font-size:11px;color:white;white-space:nowrap;cursor:pointer;
+        box-shadow:0 0 10px ${d.color}90;font-family:var(--font);`;
+      pill.textContent = d.avgAqi == null ? `⌀ ${d.district}: s/d` : `⌀ ${d.district}: ${d.avgAqi}`;
+      pill.title = d.avgAqi == null
+        ? `${d.district}: sin estaciones reportando`
+        : `${d.district}: AQI promedio ${d.avgAqi} (${d.category}) con ${d.valid}/${d.total} estaciones`;
+      airGroup.current.push(
+        new maplibregl.Marker({ element: pill, anchor: 'bottom' })
+          .setLngLat([d.lon, d.lat + 0.018])
+          .addTo(map)
+      );
+    });
     setGroupVisible(airGroup.current, layersRef.current.airQuality);
   };
 
@@ -223,9 +271,10 @@ const AirMap = memo(function AirMap({
           .setLngLat([g.lon, g.lat])
           .setHTML(miniCardHtml(
             `💧 ${g.name}`,
-            `${g.river} · red demo (simulado)`,
+            `${g.river} · SIATA Geoportal (en vivo)`,
             `<div style="font-size:12px">Nivel <strong style="color:#fff">${g.level.toFixed(2)} m</strong> ${TREND_ARROW[g.trend]}` +
-            (g.alert ? `<div style="color:#f87171;font-weight:700">⚠ sobre nivel base</div>` : '') +
+            (g.precaution != null ? ` <span style="color:#999">/ precaución ${g.precaution.toFixed(2)} m</span>` : '') +
+            (g.alert ? `<div style="color:#f87171;font-weight:700">⚠ sobre nivel de precaución</div>` : '') +
             `</div>`,
             bg,
           ))
@@ -250,16 +299,24 @@ const AirMap = memo(function AirMap({
         background:rgba(34,197,94,0.28);border:2px dashed rgba(34,197,94,0.9);
         display:flex;align-items:center;justify-content:center;font-size:18px;`;
       el.textContent = '🌳';
-      el.title = `${p.name}\nNDVI: ${p.ndvi} (demo)`;
+      const ndviPending = p.real && p.ndvi === 0;
+      el.title = ndviPending
+        ? `${p.name}\nUbicación real (OpenStreetMap) · NDVI pendiente de satélite`
+        : `${p.name}\nNDVI: ${p.ndvi} (demo)`;
       el.addEventListener('mouseenter', () => {
         popupRef.current?.remove();
         popupRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12, maxWidth: '240px' })
           .setLngLat([p.lon, p.lat])
           .setHTML(miniCardHtml(
             `🌳 ${p.name}`,
-            'Cobertura vegetal · demo (simulado)',
-            `<div style="font-size:12px">NDVI <strong style="color:#fff">${p.ndvi}</strong> ` +
-            `<span style="color:#4ade80">●●●${p.ndvi > 0.6 ? '●●' : '○○'}</span></div>`,
+            ndviPending
+              ? 'Ubicación real OSM · NDVI pendiente (Copernicus)'
+              : 'Cobertura vegetal · demo (simulado)',
+            ndviPending
+              ? `<div style="font-size:12px">NDVI <strong style="color:#fff">n/d</strong> ` +
+                `<span style="color:#9ca3af">(el satélite aún no lo mide; el círculo solo marca el área verde)</span></div>`
+              : `<div style="font-size:12px">NDVI <strong style="color:#fff">${p.ndvi}</strong> ` +
+                `<span style="color:#4ade80">●●●${p.ndvi > 0.6 ? '●●' : '○○'}</span></div>`,
             '#22c55e',
           ))
           .addTo(map);
@@ -417,11 +474,8 @@ const AirMap = memo(function AirMap({
       try {
         const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
         if (!res.ok || cancelled) return;
-        const meta = await res.json();
-        const past = meta?.radar?.past;
-        if (!past?.length || cancelled) return;
-        const last = past[past.length - 1];
-        const url = `${meta.host}${last.path}/256/{z}/{x}/{y}/2/1_1.png`;
+        const url = latestRadarTileUrl(await res.json());
+        if (!url || cancelled) return;
         if (!map.getSource?.('radar')) {
           map.addSource?.(
             'radar',
@@ -439,9 +493,9 @@ const AirMap = memo(function AirMap({
           map.addLayer?.(
             {
               id: 'radar-layer', type: 'raster', source: 'radar',
-              // Visible hasta z11 (overzoom 16x, aceptable en datos suaves);
-              // más cerca se oculta para no mostrar un manchón.
-              maxzoom: 11, paint: { 'raster-opacity': 0.55 },
+              // Visible hasta z13 (el mapa abre en z11): antes el límite era
+              // z11 y el radar nacía oculto justo en el zoom inicial.
+              maxzoom: 13, paint: { 'raster-opacity': 0.55 },
             },
           );
         }
@@ -453,6 +507,174 @@ const AirMap = memo(function AirMap({
 
     return () => { cancelled = true; };
   }, [layers.weather, mapReady]);
+
+  // Comunas de Medellín coloreadas por AQI (polígonos oficiales Alcaldía).
+  // Clic en una comuna → popup con AQI (medido/estimado) + temperatura real.
+  const comunasTemps = useRef<Array<number | null> | null>(null);
+  useEffect(() => {
+    const realMap = mapRef.current;
+    if (!realMap || !mapReady) return;
+    const map = realMap as unknown as {
+      getSource?(id: string): unknown;
+      addSource?(id: string, src: unknown): void;
+      getLayer?(id: string): unknown;
+      addLayer?(layer: unknown): void;
+      removeLayer?(id: string): void;
+      removeSource?(id: string): void;
+      on?(type: string, layer: string, fn: (e: any) => void): void;
+      off?(type: string, layer: string, fn: (e: any) => void): void;
+    };
+    const SRC = 'comunas-src';
+    const FILL = 'comunas-fill';
+    const LINE = 'comunas-line';
+    const LABEL = 'comunas-label';
+    let cancelled = false;
+    const cleanup = () => {
+      try {
+        if (map.getLayer?.(LABEL)) map.removeLayer?.(LABEL);
+        if (map.getLayer?.(FILL)) map.removeLayer?.(FILL);
+        if (map.getLayer?.(LINE)) map.removeLayer?.(LINE);
+        if (map.getSource?.(SRC)) map.removeSource?.(SRC);
+      } catch { /* noop */ }
+    };
+    const onClick = (e: any) => {
+      const f = e?.features?.[0];
+      if (!f) return;
+      const p = (f.properties ?? {}) as Record<string, any>;
+      const aqiLine =
+        p.aqi == null
+          ? `<div style="font-size:12px;color:#9ca3af">AQI s/d · sin estaciones cerca</div>`
+          : `<div style="font-size:12px">AQI <strong style="color:#fff">${p.aqi}</strong> ` +
+            `<span style="color:#999">(${p.origin === 'inside' ? 'medido en la comuna' : `estimado · ${p.station} a ${p.dist} km`})</span></div>`;
+      const tempLine =
+        p.temp == null
+          ? `<div style="font-size:12px;color:#9ca3af">🌡 n/d (sin conexión)</div>`
+          : `<div style="font-size:12px">🌡 <strong style="color:#fff">${p.temp}°C</strong> <span style="color:#999">(Open-Meteo)</span></div>`;
+      popupRef.current?.remove();
+      popupRef.current = new maplibregl.Popup({ closeButton: true, offset: 12, maxWidth: '240px' })
+        .setLngLat(e.lngLat)
+        .setHTML(miniCardHtml(`🗺️ Comuna ${p.name}`, 'Límites oficiales Alcaldía de Medellín', aqiLine + tempLine, '#8b5cf6'))
+        .addTo(realMap);
+    };
+    if (!layers.comunas) {
+      cleanup();
+      return () => { cancelled = true; };
+    }
+    (async () => {
+      try {
+        const polys: ComunaFeature[] | null = await loadComunas();
+        if (!polys?.length || cancelled) return;
+        if (!comunasTemps.current) {
+          comunasTemps.current = await loadComunaTemps(polys.map(p => p.centroid));
+        }
+        if (cancelled) return;
+        const stations = (dataRef.current.stations ?? []).map(s => ({
+          name: s.name, district: s.district, lat: s.lat, lon: s.lon,
+          aqi: s.aqi, color: s.color, quality: s.quality,
+        }));
+        const fc = {
+          type: 'FeatureCollection',
+          features: polys.map((p, i) => {
+            const a = assignComunaAqi(p, stations);
+            return {
+              type: 'Feature',
+              properties: {
+                name: p.name, color: a.color, aqi: a.aqi, origin: a.origin,
+                station: a.stationName, dist: a.distKm,
+                temp: comunasTemps.current?.[i] ?? null,
+              },
+              geometry: { type: 'Polygon', coordinates: p.polygon },
+            };
+          }),
+        };
+        cleanup();
+        map.addSource?.(SRC, { type: 'geojson', data: fc });
+        map.addLayer?.({
+          id: FILL, type: 'fill', source: SRC,
+          paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.32 },
+        });
+        map.addLayer?.({
+          id: LINE, type: 'line', source: SRC,
+          paint: { 'line-color': '#111827', 'line-width': 2, 'line-opacity': 0.85 },
+        });
+        map.addLayer?.({
+          id: LABEL, type: 'symbol', source: SRC,
+          layout: { 'text-field': ['get', 'name'], 'text-size': 11, 'text-allow-overlap': false },
+          paint: { 'text-color': '#ffffff', 'text-halo-color': '#000000', 'text-halo-width': 1.5 },
+        });
+        map.on?.('click', FILL, onClick);
+      } catch (err) {
+        console.warn('Comunas unavailable:', err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      try { map.off?.('click', FILL, onClick); } catch { /* noop */ }
+      cleanup();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layers.comunas, stations, mapReady]);
+
+  // Humo regional (demo): focos + trayectorias de adveccion por viento estimado.
+  // Visibilidad ligada a la capa Clima. Todo objeto demo va etiquetado.
+  useEffect(() => {
+    const realMap = mapRef.current;
+    if (!realMap || !mapReady) return;
+    const map = realMap as unknown as {
+      getSource?(id: string): unknown;
+      addSource?(id: string, src: unknown): void;
+      getLayer?(id: string): unknown;
+      addLayer?(layer: unknown): void;
+      removeLayer?(id: string): void;
+      removeSource?(id: string): void;
+    };
+    clearGroup(smokeGroup);
+    try {
+      if (map.getLayer?.('smoke-traj')) map.removeLayer?.('smoke-traj');
+      if (map.getSource?.('smoke-src')) map.removeSource?.('smoke-src');
+    } catch { /* noop */ }
+    if (!layers.weather || !smoke.length) return;
+    try {
+      smoke.forEach(focus => {
+        const el = document.createElement('div');
+        el.style.cssText = 'width:30px;height:30px;border-radius:50%;cursor:pointer;' +
+          'background:rgba(251,146,60,0.25);border:2px dashed #fb923c;' +
+          'display:flex;align-items:center;justify-content:center;font-size:15px;';
+        el.textContent = String.fromCodePoint(0x1F525);
+        el.title = focus.name + ' (foco demo simulado, trayectoria 12h dibujada)';
+        smokeGroup.current.push(
+          new maplibregl.Marker({ element: el }).setLngLat([focus.lon, focus.lat]).addTo(realMap),
+        );
+      });
+      setGroupVisible(smokeGroup.current, layersRef.current.weather);
+      const lines = {
+        type: 'FeatureCollection',
+        features: smoke.map(focus => ({
+          type: 'Feature',
+          properties: { name: focus.name },
+          geometry: {
+            type: 'LineString',
+            coordinates: [[focus.lon, focus.lat], ...focus.path.map(p => [p.lon, p.lat])],
+          },
+        })),
+      };
+      map.addSource?.('smoke-src', { type: 'geojson', data: lines });
+      map.addLayer?.({
+        id: 'smoke-traj',
+        type: 'line',
+        source: 'smoke-src',
+        paint: {
+          'line-color': '#fb923c',
+          'line-width': 2,
+          'line-dasharray': [2, 2],
+          'line-opacity': 0.9,
+        },
+      });
+    } catch (err) {
+      console.warn('Smoke layer failed:', err);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [smoke, mapReady, layers.weather]);
 
   const toggle3D = () => {
     const map = mapRef.current;
@@ -511,6 +733,13 @@ const AirMap = memo(function AirMap({
         </div>
       )}
 
+      {/* Techo estimado de la capa de mezcla */}
+      {mixingLabel && (
+        <div className="weather-chip" title="Altura estimada de la capa de mezcla (techo invisible)">
+          Techo {mixingLabel}
+        </div>
+      )}
+
       {/* 3D toggle */}
       <button
         onClick={toggle3D}
@@ -560,18 +789,30 @@ const AirMap = memo(function AirMap({
                 <span style={{ color: 'var(--text-muted)', marginLeft: 'auto' }}>{item.range}</span>
               </div>
             ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+              <span style={{ color: '#fff', fontWeight: 800, fontSize: 10 }}>⌀</span>
+              <span style={{ color: 'var(--text)' }}>Promedio municipio</span>
+            </div>
           </>
+        )}
+        {layers.comunas && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
+            <div style={{ width: 12, height: 12, borderRadius: 2, background: '#8b5cf6', opacity: 0.6 }} />
+            <span style={{ color: 'var(--text)' }}>
+              {layers.airQuality ? 'Comuna (color = su AQI, escala arriba)' : 'Comunas (clic: AQI + temp)'}
+            </span>
+          </div>
         )}
         {layers.weather && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: layers.airQuality ? 6 : 0 }}>
             <div style={{ width: 12, height: 12, borderRadius: 2, background: '#38bdf8' }} />
-            <span style={{ color: 'var(--text)' }}>Radar lluvia</span>
+            <span style={{ color: 'var(--text)' }}>Radar lluvia (en vivo)</span>
           </div>
         )}
         {layers.water && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
             <div style={{ width: 12, height: 12, borderRadius: 2, background: '#0284c7' }} />
-            <span style={{ color: 'var(--text)' }}>Nivel río (demo)</span>
+            <span style={{ color: 'var(--text)' }}>Nivel río (SIATA en vivo)</span>
           </div>
         )}
         {layers.vegetation && (
@@ -580,7 +821,13 @@ const AirMap = memo(function AirMap({
             <span style={{ color: 'var(--text)' }}>NDVI (demo)</span>
           </div>
         )}
-        {!layers.airQuality && !layers.weather && !layers.water && !layers.vegetation && (
+        {layers.weather && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
+            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#fb923c' }} />
+            <span style={{ color: 'var(--text)' }}>{smokeReal ? 'Humo (FIRMS en vivo)' : 'Humo (demo)'}</span>
+          </div>
+        )}
+        {!layers.airQuality && !layers.weather && !layers.water && !layers.vegetation && !layers.comunas && (
           <span style={{ color: 'var(--text-muted)' }}>Sin capas activas</span>
         )}
       </div>

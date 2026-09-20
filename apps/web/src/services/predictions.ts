@@ -23,6 +23,26 @@ export interface ForecastDay {
   recommendation: string;
 }
 
+// Histórico REAL desde serie SIATA (PM2.5 → AQI EPA). null si no hay
+// suficientes puntos válidos: quien llama cae a generateHistoricalData().
+export function seriesToHistory(
+  points: Array<{ t: number; pm25: number | null }>,
+): Array<{ timestamp: number; aqi: number; pm25: number }> | null {
+  const rows = points.filter(p => p.pm25 != null && p.pm25 >= 0);
+  if (rows.length < 12) return null;
+  return rows.slice(-72).map(p => ({
+    timestamp: p.t,
+    pm25: Math.round((p.pm25 as number) * 10) / 10,
+    aqi: Math.round(pm25ToAqi(p.pm25 as number)),
+  }));
+}
+
+/** Ruido pseudoaleatorio determinista: el pronóstico no cambia en cada apertura. */
+function pseudo01(n: number, salt: number): number {
+  const x = Math.sin(n * 127.1 + salt * 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
 // Generar histórico simulado (últimas 24 horas)
 export function generateHistoricalData(): Array<{ timestamp: number; aqi: number; pm25: number }> {
   const now = Date.now();
@@ -43,7 +63,9 @@ export function generateHistoricalData(): Array<{ timestamp: number; aqi: number
     const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.7 : 1.0;
     
     const basePM25 = 28;
-    const pm25 = basePM25 * rushHourFactor * weekendFactor * (0.9 + Math.random() * 0.2);
+    const dt = new Date(timestamp);
+    const seed = dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate();
+    const pm25 = basePM25 * rushHourFactor * weekendFactor * (0.9 + pseudo01(i, seed) * 0.2);
     
     // Convertir PM25 a AQI
     const aqi = pm25ToAqi(pm25);
@@ -79,11 +101,11 @@ export function predictAQI(historicalData: Array<{ timestamp: number; aqi: numbe
                           hour >= 10 && hour <= 16 ? 1.1 :
                           hour >= 0 && hour <= 5 ? 0.6 : 1.0;
     
-    // Predicción: tendencia + patrón + ruido
+    // Predicción: tendencia + patrón + ruido determinista (estable entre aperturas)
     const lastAqi = historicalData[historicalData.length - 1]?.aqi || mean;
     const trendAdjustment = trendSlope * i * 0.3;
     const patternAdjustment = (expectedPattern - 1) * 20;
-    const noise = (Math.random() - 0.5) * stdDev * 2;
+    const noise = (pseudo01(i, Math.round(lastAqi)) - 0.5) * stdDev * 2;
     
     const predictedAqi = Math.max(0, Math.min(500, lastAqi + trendAdjustment + patternAdjustment + noise));
     

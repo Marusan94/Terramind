@@ -3,7 +3,10 @@ version: '3.8'
 services:
   # Spatial Database with PostGIS and pgvector
   db:
-    image: postgis/postgis:16-3.4
+    build:
+      context: .
+      dockerfile: database/Dockerfile
+    image: terramind-postgis:16-3.4
     container_name: terramind-postgis
     restart: unless-stopped
     environment:

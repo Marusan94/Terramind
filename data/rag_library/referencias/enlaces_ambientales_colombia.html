@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enlaces Oficiales - Fuentes Ambientales de Colombia</title>
+    <style>
+        @page {
+            margin: 2cm;
+            size: A4;
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 10pt;
+                color: #666;
+            }
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #2c3e50;
+            max-width: 100%;
+        }
+        h1 {
+            color: #1a5276;
+            border-bottom: 3px solid #2e86c1;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            page-break-after: avoid;
+        }
+        h2 {
+            color: #2874a6;
+            border-bottom: 1px solid #85c1e9;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            page-break-after: avoid;
+        }
+        h3 {
+            color: #2e86c1;
+            margin-top: 20px;
+            page-break-after: avoid;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 9.5pt;
+            page-break-inside: auto;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        th {
+            background-color: #1a5276;
+            color: white;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #d6eaf8;
+            vertical-align: top;
+        }
+        tr:nth-child(even) td {
+            background-color: #f4f9fc;
+        }
+        tr:hover td {
+            background-color: #eaf2f8;
+        }
+        a {
+            color: #2e86c1;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        code {
+            background-color: #f4f9fc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 9pt;
+        }
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 9pt;
+            line-height: 1.4;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        .header-info {
+            background-color: #ebf5fb;
+            border-left: 4px solid #2e86c1;
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 10pt;
+        }
+        .note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 9.5pt;
+        }
+        .category-tag {
+            display: inline-block;
+            background-color: #2e86c1;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 8pt;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .toc li {
+            padding: 5px 0;
+            border-bottom: 1px dotted #dee2e6;
+        }
+        .toc a {
+            color: #1a5276;
+            font-weight: 500;
+        }
+        .footer-note {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            font-size: 9pt;
+            color: #6c757d;
+        }
+        @media print {
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-info">
+        <h1 style="margin-top: 0; border: none; color: #1a5276;">Enlaces Oficiales - Fuentes Ambientales de Colombia</h1>
+        <p><strong>Generado:</strong> 18 de septiembre de 2026</p>
+        <p><strong>Total de fuentes:</strong> 50+ enlaces oficiales organizados por categoría</p>
+        <p><strong>Uso:</strong> Referencia rápida para investigadores, abogados ambientales, consultores, autoridades y ciudadanía</p>
+    </div>
+
+    <div class="toc">
+        <h2 style="margin-top: 0;">Tabla de Contenidos</h2>
+        <ul>
+            <li><a href="#sistemas">1. Sistemas de Información Ambiental (SIAC y subsistemas)</a></li>
+            <li><a href="#normativa">2. Normativa Central (PDFs directos)</a></li>
+            <li><a href="#autoridades">3. Autoridades Ambientales</a></li>
+            <li><a href="#instrumentos">4. Instrumentos de Planificación y Gestión</a></li>
+            <li><a href="#climatico">5. Cambio Climático - Compromisos Internacionales</a></li>
+            <li><a href="#datos">6. Datos Abiertos y Portales Territoriales</a></li>
+            <li><a href="#jurisprudencia">7. Jurisprudencia y Órganos de Control</a></li>
+            <li><a href="#internacional">8. Organismos Internacionales</a></li>
+            <li><a href="#estandares">9. Estándares Técnicos y Certificación</a></li>
+            <li><a href="#universidades">10. Universidades con Investigación Ambiental</a></li>
+            <li><a href="#tematica">11. Guías de Acceso Rápido por Temática</a></li>
+            <li><a href="#comandos">12. Comandos de Verificación</a></li>
+            <li><a href="#contactos">13. Contactos Clave</a></li>
+            <li><a href="#actualizaciones">14. Actualizaciones Normativas Recientes (2024-2026)</a></li>
+        </ul>
+    </div>
+
+    <section id="sistemas">
+        <h1>1. Sistemas de Información Ambiental Oficiales <span class="category-tag">SIAC</span></h1>
+        <p>El SIAC es el "sistema de sistemas" que articula la información ambiental oficial. Cada subsistema tiene geovisores, APIs y descargas de capas.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Sistema</th>
+                    <th style="width: 25%;">Portal Principal</th>
+                    <th style="width: 35%;">Portal de Datos / Descargas</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>SIAC</strong></td>
+                    <td><a href="https://www.siac.gov.co/">https://www.siac.gov.co/</a></td>
+                    <td><a href="https://datos.siac.gov.co/">https://datos.siac.gov.co/</a></td>
+                    <td>Nodo central - geovisor, catálogo mapas, datos abiertos</td>
+                </tr>
+                <tr>
+                    <td><strong>SIRH</strong></td>
+                    <td><a href="https://portalsirh.minambiente.gov.co/">https://portalsirh.minambiente.gov.co/</a></td>
+                    <td><a href="https://sirh.ideam.gov.co/">https://sirh.ideam.gov.co/</a></td>
+                    <td>Sistema Información Recurso Hídrico - concesiones, calidad, oferta/demanda</td>
+                </tr>
+                <tr>
+                    <td><strong>SISAIRE</strong></td>
+                    <td><a href="http://sisaire.ideam.gov.co/">http://sisaire.ideam.gov.co/</a></td>
+                    <td><a href="https://www.ideam.gov.co/nuestra-entidad/estudios-ambientales/aire/calidad-del-aire/sisare">Portal IDEAM SISAIRE</a></td>
+                    <td>Calidad aire nacional - PM2.5, PM10, gases, ruido (admin. IDEAM)</td>
+                </tr>
+                <tr>
+                    <td><strong>SNIF</strong></td>
+                    <td><a href="http://snif.ideam.gov.co/">http://snif.ideam.gov.co/</a></td>
+                    <td><a href="https://www.ideam.gov.co/nuestra-entidad/ecosistemas-e-informacion-ambiental/sistema-nacional-de-informacion-forestal-snif">Portal IDEAM SNIF</a></td>
+                    <td>Información forestal - aprovechamiento, movilización, incendios, carbono</td>
+                </tr>
+                <tr>
+                    <td><strong>RUNAP</strong></td>
+                    <td><a href="https://runap.parquesnacionales.gov.co/">https://runap.parquesnacionales.gov.co/</a></td>
+                    <td><a href="https://runap-visor.parquesnacionales.gov.co/">Visor RUNAP</a></td>
+                    <td>Registro áreas protegidas SINAP - categorías, ubicación, planes manejo</td>
+                </tr>
+                <tr>
+                    <td><strong>RESPEL</strong></td>
+                    <td><a href="https://rua-respel.ideam.gov.co/">https://rua-respel.ideam.gov.co/</a></td>
+                    <td><a href="https://www.ideam.gov.co/sala-de-prensa/noticia/atencion-generadores-de-residuos-peligrosos">Guía migración a RUA</a></td>
+                    <td>Generadores residuos peligrosos (hasta dic 2025)</td>
+                </tr>
+                <tr>
+                    <td><strong>RUA</strong></td>
+                    <td><a href="https://rua.ideam.gov.co/">https://rua.ideam.gov.co/</a></td>
+                    <td><a href="https://www.ideam.gov.co/nuestra-entidad/estudios-ambientales/registros-ambientales/rua">Portal IDEAM RUA</a></td>
+                    <td>Registro Único Ambiental - obligatorio desde 2026 (Res. 839/2023)</td>
+                </tr>
+                <tr>
+                    <td><strong>VITAL</strong></td>
+                    <td><a href="https://vital.minambiente.gov.co/">https://vital.minambiente.gov.co/</a></td>
+                    <td><a href="https://vital-publico.minambiente.gov.co/">https://vital-publico.minambiente.gov.co/</a></td>
+                    <td>Trámites ambientales en línea - licencias, permisos, concesiones</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="normativa">
+        <h1>2. Normativa Central - PDFs Directos de Descarga <span class="category-tag">LEYES</span><span class="category-tag">DECRETOS</span><span class="category-tag">RESOLUCIONES</span></h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Norma</th>
+                    <th style="width: 45%;">Enlace PDF Directo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Decreto 1076/2015</strong></td>
+                    <td><a href="https://www.cancilleria.gov.co/sites/default/files/Normograma/docs/pdf/decreto_1076_2015.pdf">Descargar PDF (Cancillería)</a></td>
+                    <td>Decreto Único Reglamentario Sector Ambiente - pieza central permisos, agua, vertimientos, emisiones, bosques, biodiversidad, licenciamiento</td>
+                </tr>
+                <tr>
+                    <td><strong>Ley 99/1993</strong></td>
+                    <td><a href="https://www.minambiente.gov.co/wp-content/uploads/2021/08/ley-99-1993.pdf">Descargar PDF (MinAmbiente)</a></td>
+                    <td>Crea Ministerio Ambiente, SINA, define autoridades, licenciamiento, instrumentos económicos</td>
+                </tr>
+                <tr>
+                    <td><strong>Ley 1333/2009</strong></td>
+                    <td><a href="https://vital-publico.minambiente.gov.co/assets/documents/NORMATIVIDAD%20AMBIENTAL/Ley_1333_de_2009.pdf">Descargar PDF (VITAL Público)</a></td>
+                    <td>Procedimiento sancionatorio ambiental - infracciones, multas, decomisos, cierres</td>
+                </tr>
+                <tr>
+                    <td><strong>Resolución 631/2015</strong></td>
+                    <td><a href="https://www.minambiente.gov.co/wp-content/uploads/2021/11/resolucion-631-de-2015.pdf">Descargar PDF (MinAmbiente)</a></td>
+                    <td>Parámetros y límites máximos vertimientos puntuales a aguas superficiales y alcantarillado</td>
+                </tr>
+                <tr>
+                    <td><strong>Resolución 2254/2017</strong></td>
+                    <td><a href="https://www.minambiente.gov.co/wp-content/uploads/2021/10/Resolucion-2254-de-2017.pdf">Descargar PDF (MinAmbiente)</a></td>
+                    <td>Norma calidad aire - PM2.5 (37 µg/m³), PM10 (75 µg/m³), O₃, NO₂, SO₂, CO + ICA</td>
+                </tr>
+                <tr>
+                    <td><strong>Resolución 627/2006</strong></td>
+                    <td><a href="https://www.minambiente.gov.co/wp-content/uploads/2021/10/Resolucion-0627-de-2006.pdf">Descargar PDF (MinAmbiente)</a></td>
+                    <td>Norma nacional emisión ruido y ruido ambiental - estándares por zona y horario</td>
+                </tr>
+                <tr>
+                    <td><strong>Ley 1931/2018</strong></td>
+                    <td><a href="https://cancilleria.gov.co/normograma/compilacion/docs/ley_1931_2018.htm">Ver en Cancillería (HTML/PDF)</a></td>
+                    <td>Directrices gestión cambio climático - adaptación, mitigación, instrumentos económicos</td>
+                </tr>
+                <tr>
+                    <td><strong>Ley 2169/2021</strong></td>
+                    <td><a href="https://cancilleria.gov.co/normograma/compilacion/docs/ley_2169_2021.htm">Ver en Cancillería (HTML/PDF)</a></td>
+                    <td>Carbono neutralidad 2050, resiliencia climática, desarrollo bajo en carbono</td>
+                </tr>
+                <tr>
+                    <td><strong>Constitución Política</strong></td>
+                    <td><a href="https://www.senado.gov.co/images/Archivospdf/elsenado/Normatividad/constitucion_politica.pdf">Descargar PDF (Senado)</a></td>
+                    <td>Base jurídica: Art. 79 (ambiente sano), 80 (planificación recursos), 334 (preservación)</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="note">
+            <strong>Fuentes alternativas:</strong> SUIN-Juriscol (<a href="https://www.suin-juriscol.gov.co/">suin-juriscol.gov.co</a>) · Función Pública (<a href="https://www.funcionpublica.gov.co/eva/gestornormativo/">gestornormativo</a>) · Alcaldía Bogotá (<a href="https://www.alcaldiabogota.gov.co/sisjur/">sisjur</a>)
+        </div>
+    </section>
+
+    <section id="autoridades">
+        <h1>3. Autoridades Ambientales <span class="category-tag">NACIONALES</span><span class="category-tag">REGIONALES</span></h1>
+        
+        <h2>Nacionales</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Entidad</th>
+                    <th style="width: 28%;">URL</th>
+                    <th>Competencia Principal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Ministerio de Ambiente</strong></td>
+                    <td><a href="https://www.minambiente.gov.co/">minambiente.gov.co</a></td>
+                    <td>Rector sector, políticas nacionales, resoluciones, guías, términos de referencia</td>
+                </tr>
+                <tr>
+                    <td><strong>ANLA</strong></td>
+                    <td><a href="https://www.anla.gov.co/">anla.gov.co</a></td>
+                    <td>Licencias ambientales nacionales, EIA, TDR, seguimiento, modificaciones</td>
+                </tr>
+                <tr>
+                    <td><strong>IDEAM</strong></td>
+                    <td><a href="https://www.ideam.gov.co/">ideam.gov.co</a></td>
+                    <td>Clima, hidrología, meteorología, calidad aire/agua, bosques, deforestación, cambio climático</td>
+                </tr>
+                <tr>
+                    <td><strong>Parques Nacionales</strong></td>
+                    <td><a href="https://www.parquesnacionales.gov.co/">parquesnacionales.gov.co</a></td>
+                    <td>Sistema Nacional Parques (SPNN), SINAP, RUNAP, 123 áreas protegidas</td>
+                </tr>
+                <tr>
+                    <td><strong>ANM</strong></td>
+                    <td><a href="https://www.anm.gov.co/">anm.gov.co</a></td>
+                    <td>Títulos mineros, catastro minero (Anna Minería), normativa minero-ambiental</td>
+                </tr>
+                <tr>
+                    <td><strong>Instituto Humboldt</strong></td>
+                    <td><a href="https://www.humboldt.org.co/">humboldt.org.co</a></td>
+                    <td>Biodiversidad, colecciones biológicas, SiB Colombia, reportes Bio, investigación</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Regionales / Urbanas</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Entidad</th>
+                    <th style="width: 28%;">URL</th>
+                    <th>Jurisdicción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>AMVA</strong></td>
+                    <td><a href="https://www.metropol.gov.co/">metropol.gov.co</a></td>
+                    <td>Valle de Aburrá (10 municipios) - aire, ruido, residuos, agua, trámites</td>
+                </tr>
+                <tr>
+                    <td><strong>CORANTIOQUIA</strong></td>
+                    <td><a href="https://www.corantioquia.gov.co/">corantioquia.gov.co</a></td>
+                    <td>Centro Antioquia (80 municipios) - permisos, agua, bosques, biodiversidad, minería</td>
+                </tr>
+                <tr>
+                    <td><strong>CORNARE</strong></td>
+                    <td><a href="https://www.cornare.gov.co/">cornare.gov.co</a></td>
+                    <td>Oriente antioqueño - normativa, permisos, recursos naturales, trámites</td>
+                </tr>
+                <tr>
+                    <td><strong>Alcaldía Medellín</strong></td>
+                    <td><a href="https://www.medellin.gov.co/">medellin.gov.co</a></td>
+                    <td>POT (Acuerdo 48/2014), usos suelo, estructura ecológica, riesgo, planeación</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="instrumentos">
+        <h1>4. Instrumentos de Planificación y Gestión <span class="category-tag">PLANIFICACIÓN</span></h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Instrumento</th>
+                    <th style="width: 45%;">URL / Acceso</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>POMCA</strong></td>
+                    <td><a href="https://portalsirh.minambiente.gov.co/planes-de-ordenacion-y-manejo-de-cuencas-hidrograficas-pomca">Portal SIRH - POMCA</a></td>
+                    <td>Planes Ordenación Manejo Cuencas - determinantes, usos, protección hídrica, riesgos. Guía técnica MinAmbiente 2014</td>
+                </tr>
+                <tr>
+                    <td><strong>PIGECA</strong></td>
+                    <td><a href="https://www.metropol.gov.co/ambiental/calidad-del-aire/Paginas/Gestion-integral/PIGECA.aspx">AMVA - PIGECA</a></td>
+                    <td>Plan Integral Gestión Calidad Aire Valle Aburrá - estrategias reducción contaminación 2030</td>
+                </tr>
+                <tr>
+                    <td><strong>POECA</strong></td>
+                    <td><a href="https://www.metropol.gov.co/">AMVA - Protocolo episodios</a></td>
+                    <td>Protocolo Operacional Episodios Contaminación Atmosférica - alertas, prevención, emergencia</td>
+                </tr>
+                <tr>
+                    <td><strong>Plan Ruido 2019-2030</strong></td>
+                    <td>Acuerdo Metropolitano 24/2019</td>
+                    <td>Prevención y control ruido Valle Aburrá - mapas estratégicos, planes descontaminación</td>
+                </tr>
+                <tr>
+                    <td><strong>Escazú (Ley 2273/2022)</strong></td>
+                    <td><a href="https://www.minambiente.gov.co/historico-escazu-es-una-realidad-en-colombia-la-corte-avala-su-constitucionalidad">MinAmbiente - Escazú</a></td>
+                    <td>Acceso información, participación pública, justicia ambiental, protección defensores</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="climatico">
+        <h1>5. Cambio Climático - Compromisos Internacionales <span class="category-tag">NDC</span><span class="category-tag">PARÍS</span></h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 28%;">Documento</th>
+                    <th style="width: 50%;">URL</th>
+                    <th>Contenido</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>NDC 3.0 Colombia (2025)</strong></td>
+                    <td><a href="https://unfccc.int/sites/default/files/2025-12/NDC%203.0%20Transformaciones%20para%20la%20Vida%20(Colombia).pdf">PDF UNFCCC (oficial)</a></td>
+                    <td>"Transformaciones para la Vida" - metas 2030/2035, visión carbono neutralidad 2050, adaptación</td>
+                </tr>
+                <tr>
+                    <td><strong>NDC 2.0 Colombia (2020)</strong></td>
+                    <td><a href="https://www.minambiente.gov.co/cambio-climatico-y-gestion-del-riesgo/actualizacion-de-la-contribucion-determinada-a-nivel-nacional-ndc">Portal MinAmbiente</a></td>
+                    <td>Meta 51% reducción GEI 2030, componentes adaptación, documentos soporte</td>
+                </tr>
+                <tr>
+                    <td><strong>Estrategia 2050 (E2050)</strong></td>
+                    <td><a href="https://unfccc.int/sites/default/files/resource/Colombia_LTS1.pdf">PDF UNFCCC</a></td>
+                    <td>Visión desarrollo bajo emisiones y resiliente al clima 2050</td>
+                </tr>
+                <tr>
+                    <td><strong>Plan Nacional Adaptación</strong></td>
+                    <td><a href="https://www.minambiente.gov.co/cambio-climatico-y-gestion-del-riesgo/plan-nacional-de-adaptacion-al-cambio-climatico">MinAmbiente - PNACC</a></td>
+                    <td>PNACC 2012 + Plan Acción PNACC en formulación</td>
+                </tr>
+                <tr>
+                    <td><strong>SNICC</strong></td>
+                    <td><a href="https://www.minambiente.gov.co/cambio-climatico-y-gestion-del-riesgo/sistema-nacional-de-informacion-sobre-cambio-climatico-snicc">MinAmbiente - SNICC</a></td>
+                    <td>Sistema Nacional Información Cambio Climático (Ley 1931 Art. 26 mod. Ley 2169)</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="datos">
+        <h1>6. Datos Abiertos y Portales Territoriales <span class="category-tag">OPEN DATA</span></h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Portal</th>
+                    <th style="width: 35%;">URL</th>
+                    <th>Cobertura / Datasets</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Datos Abiertos Colombia</strong></td>
+                    <td><a href="https://www.datos.gov.co/">datos.gov.co</a></td>
+                    <td>Nacional - 10,000+ datasets, federación Ley 1712/2014, API Socrata</td>
+                </tr>
+                <tr>
+                    <td><strong>MEData (Medellín)</strong></td>
+                    <td><a href="https://medata.gov.co/">medata.gov.co</a></td>
+                    <td>Municipal - 400+ datasets, 28 dependencias, tableros dinámicos, GeoMedellín</td>
+                </tr>
+                <tr>
+                    <td><strong>SIAC Datos Abiertos</strong></td>
+                    <td><a href="https://datos.siac.gov.co/">datos.siac.gov.co</a></td>
+                    <td>Ambiental - geovisores, capas, metadatos, servicios OGC, catálogo mapas</td>
+                </tr>
+                <tr>
+                    <td><strong>IDEAM Geoportal</strong></td>
+                    <td><a href="https://www.ideam.gov.co/geoportal-ambiental-institucional">ideam.gov.co/geoportal</a></td>
+                    <td>Geoespacial - 650+ capas, gestor metadatos, GeoServicios OGC, descarga shapefiles</td>
+                </tr>
+                <tr>
+                    <td><strong>ANNA Minería</strong></td>
+                    <td><a href="https://anna.mineria.gov.co/">anna.mineria.gov.co</a></td>
+                    <td>Catastro minero integrado con capas ambientales (áreas protegidas, POMCA, etc.)</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="jurisprudencia">
+        <h1>7. Jurisprudencia y Órganos de Control <span class="category-tag">JURISPRUDENCIA</span></h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Fuente</th>
+                    <th style="width: 35%;">URL</th>
+                    <th>Tipo / Acceso</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Corte Constitucional</strong></td>
+                    <td><a href="https://www.corteconstitucional.gov.co/relatoria/">Relatoría - corteconstitucional.gov.co</a></td>
+                    <td>Sentencias, tutelas, control constitucionalidad ambiental (buscar: "ambiente sano", "licencia", "sanción")</td>
+                </tr>
+                <tr>
+                    <td><strong>Consejo de Estado</strong></td>
+                    <td><a href="https://www.consejodeestado.gov.co/">consejodeestado.gov.co</a></td>
+                    <td>Contencioso administrativo - nulidad decretos, licencias, actos admin. ambientales</td>
+                </tr>
+                <tr>
+                    <td><strong>Corte Suprema</strong></td>
+                    <td><a href="https://www.cortesuprema.gov.co/">cortesuprema.gov.co</a></td>
+                    <td>Casación penal ambiental, tutelas salud/ambiente, responsabilidad civil</td>
+                </tr>
+                <tr>
+                    <td><strong>Procuraduría Ambiental</strong></td>
+                    <td><a href="https://www.procuraduria.gov.co/">procuraduria.gov.co</a></td>
+                    <td>Control disciplinario, preventivo, intervención procesos ambientales</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="internacional">
+        <h1>8. Organismos Internacionales con Enfoque Colombia <span class="category-tag">GLOBAL</span></h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Organismo</th>
+                    <th style="width: 38%;">URL Colombia</th>
+                    <th>Temas Principales</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>PNUMA / UNEP</strong></td>
+                    <td><a href="https://www.unep.org/colombia">unep.org/colombia</a></td>
+                    <td>Contaminación, biodiversidad, químicos, residuos, clima, economía circular, restauración</td>
+                </tr>
+                <tr>
+                    <td><strong>OMS / OPS</strong></td>
+                    <td><a href="https://www.paho.org/es/temas/calidad-aire">paho.org - calidad aire</a></td>
+                    <td>Calidad aire, agua, saneamiento, ruido, químicos, clima, efectos salud (guías AQG)</td>
+                </tr>
+                <tr>
+                    <td><strong>OCDE</strong></td>
+                    <td><a href="https://www.oecd.org/en/publications/2026/01/oecd-environmental-performance-reviews-colombia-2026_ae5732e1/full-report.html">Environmental Performance Review 2026</a></td>
+                    <td>46 recomendaciones - aire, residuos, agua, biodiversidad, clima en sector financiero</td>
+                </tr>
+                <tr>
+                    <td><strong>UNFCCC</strong></td>
+                    <td><a href="https://unfccc.int/">unfccc.int</a></td>
+                    <td>NDC, Acuerdo París, reportes BTR, inventarios GEI, registro provisional NDC</td>
+                </tr>
+                <tr>
+                    <td><strong>Banco Mundial</strong></td>
+                    <td><a href="https://www.worldbank.org/en/country/colombia">worldbank.org/colombia</a></td>
+                    <td>Financiamiento climático, análisis sectoriales, indicadores desarrollo sostenible</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="estandares">
+        <h1>9. Estándares Técnicos y Certificación <span class="category-tag">ISO</span><span class="category-tag">ICONTEC</span></h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Estándar</th>
+                    <th style="width: 38%;">URL / Acceso</th>
+                    <th>Aplicación en Colombia</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>ISO 14001:2015 (NTC-ISO)</strong></td>
+                    <td><a href="https://forpo.gov.co/wp-content/uploads/2026/01/NTC-ISO-14001-2015.pdf">PDF NTC-ISO 14001:2015</a></td>
+                    <td>Sistemas gestión ambiental - requisitos con orientación para uso. Adopción idéntica ISO</td>
+                </tr>
+                <tr>
+                    <td><strong>ISO 14064-1</strong></td>
+                    <td><a href="https://www.icontec.org/">ICONTEC - Certificación GEI</a></td>
+                    <td>Inventario GEI organizacional - cuantificación y reporte emisiones/remociones</td>
+                </tr>
+                <tr>
+                    <td><strong>ISO 14067</strong></td>
+                    <td><a href="https://www.icontec.org/">ICONTEC - Huella carbono producto</a></td>
+                    <td>Huella de carbono de productos - ACV, declaración ambiental</td>
+                </tr>
+                <tr>
+                    <td><strong>GHG Protocol</strong></td>
+                    <td><a href="https://ghgprotocol.org/">ghgprotocol.org</a></td>
+                    <td>Contabilidad corporativa GEI - scopes 1,2,3, metas ciencia (SBTi)</td>
+                </tr>
+                <tr>
+                    <td><strong>ICONTEC Certificaciones</strong></td>
+                    <td><a href="https://www.icontec.org/">icontec.org</a></td>
+                    <td>Carbono neutro, Sello Sostenibilidad ESG Verified, ISO 9001, 45001, 37001</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="universidades">
+        <h1>10. Universidades con Investigación Ambiental Destacada <span class="category-tag">ACADEMIA</span></h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 18%;">Universidad</th>
+                    <th style="width: 32%;">Portal Investigación</th>
+                    <th>Áreas Fuertes / Proyectos Recientes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>UdeA</strong></td>
+                    <td><a href="https://www.udea.edu.co/wps/portal/udea/web/inicio/investigacion">udea.edu.co/investigacion</a></td>
+                    <td>Biodiversidad, calidad aire, agua, bioinsumos, sigatoka café, UI GreenMetric top 10 Colombia</td>
+                </tr>
+                <tr>
+                    <td><strong>UNAL</strong></td>
+                    <td><a href="https://www.unal.edu.co/">unal.edu.co</a></td>
+                    <td>Cambio climático, páramos, amazonía, modelación hidrológica, IDEAM convenios</td>
+                </tr>
+                <tr>
+                    <td><strong>EAFIT</strong></td>
+                    <td><a href="https://www.eafit.edu.co/">eafit.edu.co</a></td>
+                    <td>Ingeniería ambiental, modelación numérica, energía, calidad aire SIATA</td>
+                </tr>
+                <tr>
+                    <td><strong>UPB</strong></td>
+                    <td><a href="https://www.upb.edu.co/">upb.edu.co</a></td>
+                    <td>Sostenibilidad, gestión ambiental, biotecnología, recursos hídricos</td>
+                </tr>
+                <tr>
+                    <td><strong>ITM</strong></td>
+                    <td><a href="https://www.itm.edu.co/">itm.edu.co</a></td>
+                    <td>Salud ambiental, calidad aire, residuos, economía circular</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="tematica">
+        <h1>11. Guías de Acceso Rápido por Temática <span class="category-tag">QUICK REF</span></h1>
+        
+        <h2>🔍 Para licenciamiento ambiental</h2>
+        <ol>
+            <li>VITAL → <a href="https://vital-publico.minambiente.gov.co/">vital-publico.minambiente.gov.co</a></li>
+            <li>ANLA → <a href="https://www.anla.gov.co/01_anla/vital-ventanilla-integral-de-tramites-ambientales-en-linea">ANLA - VITAL</a></li>
+            <li>Decreto 1076 Libro 2 → <a href="https://www.cancilleria.gov.co/normograma/compilacion/docs/decreto_1076_2015.htm">Cancillería - Decreto 1076</a></li>
+        </ol>
+
+        <h2>💧 Para agua y vertimientos</h2>
+        <ol>
+            <li>Resolución 631/2015 (límites) → <a href="https://www.minambiente.gov.co/wp-content/uploads/2021/11/resolucion-631-de-2015.pdf">PDF directo</a></li>
+            <li>SIRH → <a href="https://portalsirh.minambiente.gov.co/">portalsirh.minambiente.gov.co</a></li>
+            <li>POMCA → <a href="https://portalsirh.minambiente.gov.co/planes-de-ordenacion-y-manejo-de-cuencas-hidrograficas-pomca">SIRH - POMCA</a></li>
+        </ol>
+
+        <h2>🌬️ Para calidad del aire</h2>
+        <ol>
+            <li>Resolución 2254/2017 (norma) → <a href="https://www.minambiente.gov.co/wp-content/uploads/2021/10/Resolucion-2254-de-2017.pdf">PDF directo</a></li>
+            <li>SISAIRE → <a href="http://sisaire.ideam.gov.co/">sisaire.ideam.gov.co</a></li>
+            <li>SIATA (Valle Aburrá) → <a href="https://siata.gov.co/">siata.gov.co</a></li>
+            <li>PIGECA/POECA → <a href="https://www.metropol.gov.co/">metropol.gov.co</a></li>
+        </ol>
+
+        <h2>🌳 Para biodiversidad y áreas protegidas</h2>
+        <ol>
+            <li>RUNAP → <a href="https://runap.parquesnacionales.gov.co/">runap.parquesnacionales.gov.co</a></li>
+            <li>Instituto Humboldt → <a href="https://www.humboldt.org.co/consulta">humboldt.org.co/consulta</a></li>
+            <li>SiB Colombia → <a href="https://www.sibcolombia.net/">sibcolombia.net</a></li>
+            <li>Parques Nacionales → <a href="https://www.parquesnacionales.gov.co/">parquesnacionales.gov.co</a></li>
+        </ol>
+
+        <h2>♻️ Para residuos peligrosos</h2>
+        <ol>
+            <li>RESPEL → <a href="https://rua-respel.ideam.gov.co/">rua-respel.ideam.gov.co</a> (hasta dic 2025)</li>
+            <li>RUA → <a href="https://rua.ideam.gov.co/">rua.ideam.gov.co</a> (desde 2026 - Res. 839/2023)</li>
+            <li>Resolución 1362/2007 → <a href="https://www.minambiente.gov.co/asuntos-ambientales-sectorial-y-urbana/residuos-peligrosos">MinAmbiente - Residuos</a></li>
+        </ol>
+
+        <h2>🌡️ Para cambio climático</h2>
+        <ol>
+            <li>NDC 3.0 → <a href="https://unfccc.int/sites/default/files/2025-12/NDC%203.0%20Transformaciones%20para%20la%20Vida%20(Colombia).pdf">UNFCCC PDF</a></li>
+            <li>Ley 1931/2018 + Ley 2169/2021 → enlaces sección normativa</li>
+            <li>SNICC → <a href="https://www.minambiente.gov.co/cambio-climatico-y-gestion-del-riesgo/sistema-nacional-de-informacion-sobre-cambio-climatico-snicc">MinAmbiente - SNICC</a></li>
+            <li>RENARE → <a href="https://renare.ideam.gov.co/">renare.ideam.gov.co</a></li>
+        </ol>
+    </section>
+
+    <section id="comandos">
+        <h1>12. Comandos de Verificación y Descarga <span class="category-tag">CLI</span></h1>
+        <pre><code># Verificar accesibilidad de portales principales
+curl -I https://www.siac.gov.co/
+curl -I https://www.anla.gov.co/
+curl -I https://www.ideam.gov.co/
+curl -I https://vital.minambiente.gov.co/
+curl -I https://www.datos.gov.co/
+
+# Descargar normas clave (ejemplo)
+wget https://www.minambiente.gov.co/wp-content/uploads/2021/11/resolucion-631-de-2015.pdf
+wget https://www.minambiente.gov.co/wp-content/uploads/2021/10/Resolucion-2254-de-2017.pdf
+wget https://unfccc.int/sites/default/files/2025-12/NDC%203.0%20Transformaciones%20para%20la%20Vida%20(Colombia).pdf
+
+# Verificar PDFs descargados
+file *.pdf
+ls -lh *.pdf</code></pre>
+    </section>
+
+    <section id="contactos">
+        <h1>13. Contactos Clave por Entidad <span class="category-tag">CONTACTOS</span></h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Entidad</th>
+                    <th style="width: 38%;">Correo</th>
+                    <th>Teléfono</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>MinAmbiente</strong></td><td>servicioalciudadano@minambiente.gov.co</td><td>601-3323400</td></tr>
+                <tr><td><strong>ANLA</strong></td><td>licencias@anla.gov.co</td><td>601-2540111</td></tr>
+                <tr><td><strong>IDEAM</strong></td><td>contacto@ideam.gov.co</td><td>601-3075600</td></tr>
+                <tr><td><strong>AMVA</strong></td><td>atencionalciudadano@metropol.gov.co</td><td>604-3856000</td></tr>
+                <tr><td><strong>CORANTIOQUIA</strong></td><td>corantioquia@corantioquia.gov.co</td><td>604-4938888</td></tr>
+                <tr><td><strong>Parques Nacionales</strong></td><td>atencion.usuario@parquesnacionales.gov.co</td><td>601-3532400</td></tr>
+                <tr><td><strong>VITAL Soporte</strong></td><td>vital@minambiente.gov.co</td><td>-</td></tr>
+                <tr><td><strong>Instituto Humboldt</strong></td><td>informacion@humboldt.org.co</td><td>310-2158291</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="actualizaciones">
+        <h1>14. Actualizaciones Normativas Recientes (2024-2026) <span class="category-tag">UPDATE</span></h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 12%;">Año</th>
+                    <th style="width: 20%;">Norma</th>
+                    <th>Tema / Impacto</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>2026</td><td>Ley 2387/2024</td><td>Modifica Ley 1333 - reincidencia personas jurídicas en infracciones ambientales</td></tr>
+                <tr><td>2025</td><td>Ley 2450/2025</td><td>Política pública calidad acústica - actualización norma ruido (Res. 627/2006)</td></tr>
+                <tr><td>2025</td><td>Resolución 839/2023</td><td>RUA obligatorio desde 2026 - reemplaza RESPEL, plazos por dígito NIT</td></tr>
+                <tr><td>2024</td><td>Decreto 909/2024</td><td>Modifica Decreto 1076 - mercados de carbono, Art. 2.2.2.8.1</td></tr>
+                <tr><td>2024</td><td>Resolución 868/2026</td><td>TDR EIA pequeña minería - ANM/MADS</td></tr>
+                <tr><td>2023</td><td>Ley 2273/2022</td><td>Aprobación Acuerdo Escazú - constitucionalidad avalada Corte (Sent. C-359/2024)</td></tr>
+                <tr><td>2023</td><td>Resolución 1447/2018</td><td>SNICC - Sistema Información Cambio Climático (Ley 1931 Art. 26 mod. Ley 2169)</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <div class="footer-note">
+        <p><strong>Fin del documento</strong></p>
+        <p>Todos los enlaces verificados funcionales al 18/09/2026. Las URLs de PDFs directos pueden cambiar; si fallan, acceder vía portal oficial de la entidad emisora.</p>
+        <p>Este documento es de referencia y no sustituye la consulta de las fuentes oficiales para trámites vinculantes.</p>
+    </div>
+</body>
+</html>
