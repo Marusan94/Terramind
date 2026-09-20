@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/api/v1/:path*",
-      "destination": "https://terramind-api.vercel.app/api/v1/:path*"
+        "destination": "https://calendar-ia.onrender.com/api/v1/:path*"
     }
   ],
   "headers": [
