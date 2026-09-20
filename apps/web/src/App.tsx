@@ -9,12 +9,15 @@ import AirDashboard from './components/AirDashboard';
 import RagLibrary from './components/RagLibrary';
 import AirQualityOverview from './components/AirQualityOverview';
 import ChatWidget from './components/ChatWidget';
+import AlertsPanel from './components/AlertsPanel';
 import { AIR_QUALITY_STATIONS, generateRealisticData, calculateAQI } from './data/stations';
-import { loadValleyData, ValleyData } from './services/valley';
+import { loadValleyData, ValleyData, ValleyStation } from './services/valley';
 import { LayerState, ALL_LAYERS_ON } from './layers';
 import { estimateMixingHeightM, mixingState, demoSmokeFoci, trajectory } from './services/intelligence';
 import type { SmokeFocus } from './services/intelligence';
 import { loadFireFoci } from './services/fires';
+import { shareReport, type ShareSnapshot } from './services/share';
+import { loadAlerts, evaluateAlerts, requestNotifyPermission, maybeNotify, type AlertConfig, type StationLike } from './services/alerts';
 import './styles/theme.css';
 
 if ('serviceWorker' in navigator) {
@@ -50,6 +53,7 @@ export default function App() {
 
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [ragOpen, setRagOpen] = useState(false);
+  const [alertsOpen, setAlertsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState('');
@@ -60,6 +64,24 @@ export default function App() {
       return false;
     }
   });
+
+  // Estaciones mapeadas para alertas (solo las que tienen AQI válido)
+  const stationsForAlerts = useMemo<StationLike[]>(() => {
+    if (!valley?.stations) return [];
+    return valley.stations
+      .filter(s => s.quality !== 'MISSING')
+      .map(s => ({ name: s.name, district: s.district, aqi: s.aqi }));
+  }, [valley?.stations]);
+
+  // Evalúa alertas al cambiar datos o config
+  useEffect(() => {
+    const cfg = loadAlerts();
+    if (!cfg.enabled) return;
+    const hits = evaluateAlerts(stationsForAlerts, stats.avgAqi, cfg);
+    if (hits.length > 0) {
+      void maybeNotify(hits, cfg);
+    }
+  }, [stats.avgAqi, stationsForAlerts, valley?.updatedAt]);
 
   useEffect(() => {
     document.body.classList.toggle('command-mode', commandMode);
@@ -178,7 +200,28 @@ export default function App() {
     return { mixingLabel: mixingM + ' m · ' + ms.label, smoke, smokeReal: fires !== null };
   }, [fires]);
 
-  const hasRainAlert = false;
+  // Alerta de lluvia real desde Open-Meteo o medidores
+  const hasRainAlert = Boolean(
+    valley?.weather?.alerts?.length ||
+    valley?.gauges?.some(g => g.alert)
+  );
+
+  // Manejador para compartir reporte
+  const handleShare = async () => {
+    const snap: ShareSnapshot = {
+      avgAqi: stats.avgAqi,
+      avgPm25: stats.avgPm25,
+      avgPm10: stats.avgPm10,
+      category: stats.category,
+      generatedAt: stats.generatedAt,
+      source: stats.source,
+      dataDate: stats.dataDate,
+      stations: valley?.stations.length ?? AIR_QUALITY_STATIONS.length,
+    };
+    const result = await shareReport(snap);
+    const msg = result === 'shared' ? 'Compartido ✓' : result === 'copied' ? 'Copiado al portapapeles ✓' : 'No se pudo compartir';
+    alert(msg);
+  };
 
   return (
     <div className="app">
@@ -263,10 +306,10 @@ export default function App() {
           <button className="btn" onClick={() => setRagOpen(true)} title="Biblioteca documental ambiental con citas">
             📚 RAG Documental
           </button>
-          <button className="btn">
+          <button className="btn" onClick={() => setAlertsOpen(true)}>
             🔔 Configurar Alertas
           </button>
-          <button className="btn">
+          <button className="btn" onClick={handleShare}>
             📤 Compartir
           </button>
           <button
@@ -282,7 +325,9 @@ export default function App() {
         <div className="connection">
           <div className="connection-status">
             <div className="status-dot" />
-            <span>Conectado • {valley?.stations.length ?? AIR_QUALITY_STATIONS.length} estaciones</span>
+            <span>
+              {valley?.live ? 'Conectado' : 'Demo / Offline'} • {valley?.stations.length ?? AIR_QUALITY_STATIONS.length} estaciones
+            </span>
           </div>
           <button
             className="btn"
@@ -347,8 +392,16 @@ export default function App() {
         }} />
 
         {/* Dashboard overlay */}
-        {dashboardOpen && <AirDashboard onClose={() => setDashboardOpen(false)} layers={layers} valley={valley} />}
+        {dashboardOpen && <AirDashboard onClose={() => setDashboardOpen(false)} layers={layers} valley={valley} airQualityData={{ aqi: stats.avgAqi, pm25: stats.avgPm25, category: stats.category }} onConfigureAlerts={() => { setDashboardOpen(false); setAlertsOpen(true); }} onShare={handleShare} />}
         {ragOpen && <RagLibrary onClose={() => setRagOpen(false)} />}
+        <AlertsPanel
+          open={alertsOpen}
+          onClose={() => setAlertsOpen(false)}
+          avgAqi={stats.avgAqi}
+          stations={stationsForAlerts}
+          source={stats.source}
+          dataDate={stats.dataDate}
+        />
       </main>
     </div>
   );

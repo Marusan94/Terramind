@@ -56,6 +56,8 @@ interface AirDashboardProps {
   layers?: LayerState;
   valley?: ValleyData | null;
   airQualityData?: { aqi: number; pm25: number; category: string } | undefined;
+  onConfigureAlerts?: () => void;
+  onShare?: () => void;
 }
 
 function fallbackStations(): ValleyStation[] {
@@ -131,7 +133,7 @@ function downloadCsv(filename: string, rows: string[][]) {
 const TH = { textAlign: 'left' as const, padding: 8, color: 'var(--text-muted)' };
 const THC = { textAlign: 'center' as const, padding: 8, color: 'var(--text-muted)' };
 
-export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley = null }: AirDashboardProps) {
+export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley = null, airQualityData, onConfigureAlerts, onShare }: AirDashboardProps) {
   const [tab, setTab] = useState<TabKey>('overview');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
@@ -445,10 +447,10 @@ export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley =
               <span>Acciones Rápidas</span>
             </div>
             <div className="quick-actions">
-              <button className="action-btn">
+              <button className="action-btn" onClick={onConfigureAlerts}>
                 🔔 Configurar alertas
               </button>
-              <button className="action-btn">
+              <button className="action-btn" onClick={onShare}>
                 📤 Compartir reporte
               </button>
               <button
