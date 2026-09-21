@@ -92,6 +92,13 @@ cd apps/api && pytest          # tests backend
 
 ## 🏗️ Arquitectura
 
+![Terramind Architecture](./docs/architecture-terramind.png)
+
+*Diagrama interactivo: [`docs/architecture-terramind.html`](./docs/architecture-terramind.html) — ábrelo en el navegador para explorar nodos, trazar rutas (`R`), ver alcance upstream/downstream, comparar roles (`L`), modo presentación (`F`) y exportar (`E`). Fuente versionada: [`docs/architecture-terramind.json`](./docs/architecture-terramind.json) (generado con [Archify](https://github.com/tt-a1i/archify), validación showcase 9/9).*
+
+<details>
+<summary><strong>Diagrama ASCII (resumen)</strong></summary>
+
 ```
                 React 18 + TypeScript (MapLibre + deck.gl)
                               │
@@ -108,6 +115,8 @@ cd apps/api && pytest          # tests backend
    PostGIS + Redis     SIATA / Open-Meteo    Caché de mosaicos
    (espacial)          / RainViewer          + modo demo
 ```
+
+</details>
 
 ## 📚 Documentación
 

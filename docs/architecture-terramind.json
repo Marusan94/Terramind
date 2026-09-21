@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Terramind — Environmental Intelligence Platform",
+    "subtitle": "Data flow: External APIs → valley.ts → Frontend → Backend → PostGIS",
+    "locale": "en",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "overview", "label": "Overview", "focus": ["siata", "openmeteo", "valley-service", "web-app", "copilot", "omniroute", "postgis"] }
+    ],
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "frontend": { "label": "Frontend", "visible": true },
+        "backend": { "label": "Backend", "visible": true },
+        "database": { "label": "Database", "visible": true },
+        "external": { "label": "External APIs", "visible": true }
+      }
+    }
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [80, 60],
+    "cols": 3,
+    "gapX": 80,
+    "gapY": 80,
+    "cellW": 260,
+    "cellH": 120
+  },
+  "components": [
+    {
+      "id": "siata",
+      "type": "external",
+      "label": "SIATA",
+      "sublabel": "Histórico sep-2024",
+      "row": 0,
+      "col": 0,
+      "size": [200, 80]
+    },
+    {
+      "id": "openmeteo",
+      "type": "external",
+      "label": "Open-Meteo CAMS",
+      "sublabel": "Aire + clima (gratis)",
+      "row": 1,
+      "col": 0,
+      "size": [200, 80]
+    },
+    {
+      "id": "valley-service",
+      "type": "frontend",
+      "label": "valley.ts (Data Layer)",
+      "sublabel": "Unifica SIATA + Open-Meteo + sim",
+      "row": 0,
+      "col": 1,
+      "size": [260, 100]
+    },
+    {
+      "id": "web-app",
+      "type": "frontend",
+      "label": "Terramind Web App",
+      "sublabel": "React 18 + TS + Vite",
+      "row": 0,
+      "col": 2,
+      "size": [260, 100]
+    },
+    {
+      "id": "omniroute",
+      "type": "backend",
+      "label": "OmniRoute LLM",
+      "sublabel": "Groq → OpenRouter → DeepSeek → mock",
+      "row": 2,
+      "col": 1,
+      "size": [280, 100]
+    },
+    {
+      "id": "postgis",
+      "type": "database",
+      "label": "PostgreSQL + PostGIS",
+      "sublabel": "geometry(4326) + pgvector",
+      "row": 2,
+      "col": 2,
+      "size": [280, 100]
+    },
+    {
+      "id": "maplibre",
+      "type": "frontend",
+      "label": "MapLibre + deck.gl",
+      "sublabel": "3D terrain + buildings",
+      "row": 1,
+      "col": 1,
+      "size": [260, 100]
+    },
+    {
+      "id": "copilot",
+      "type": "frontend",
+      "label": "AI Copilot",
+      "sublabel": "OpenRouter streaming + RAG",
+      "row": 1,
+      "col": 2,
+      "size": [260, 100]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "External Data Sources",
+      "wraps": ["siata", "openmeteo"],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "Frontend Plane (React 18 + Vite)",
+      "wraps": ["valley-service", "web-app", "maplibre", "copilot"],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "Backend Plane (FastAPI)",
+      "wraps": ["omniroute"],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "Data Plane",
+      "wraps": ["postgis"],
+      "pad": 20
+    }
+  ],
+  "connections": [
+    { "from": "siata", "to": "valley-service", "label": "GET histórico", "variant": "dashed" },
+    { "from": "openmeteo", "to": "valley-service", "label": "GET CAMS + weather", "variant": "dashed" },
+    { "from": "valley-service", "to": "web-app", "label": "loadValleyData()", "variant": "default", "labelAt": [660, 174] },
+    { "from": "web-app", "to": "maplibre", "label": "renders", "variant": "default" },
+    { "from": "web-app", "to": "copilot", "label": "opens chat", "variant": "default", "labelAt": [890, 174] },
+    { "from": "copilot", "to": "omniroute", "label": "POST /copilot/query (SSE)", "variant": "default" },
+    { "from": "omniroute", "to": "postgis", "label": "RAG vector search", "variant": "default", "labelAt": [730, 574] }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Data Honesty — Always Visible in UI",
+      "items": [
+        "Preference order: 1) SIATA historical (sep-2024)  2) Open-Meteo CAMS (~11km model, current)  3) Deterministic simulated (offline fallback)",
+        "Every datapoint shows source + quality flag (VALID / MISSING / SIMULATED)",
+        "No silent substitution — UI declares origin explicitly"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Anti-Hallucination Contract (AGENTS.md §6)",
+      "items": [
+        "Copilot responses MUST include: confidence_score (0.0–1.0), sources[] with DOI/URL, spatial_features GeoJSON, metrics with unit + threshold_status",
+        "No source → explicitly declared in response",
+        "RAG citations from indexed env law docs (Ley 99/1993, Decreto 1076/2015, Res 631/2015, etc.)"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "OmniRoute — Cascading Fallback",
+      "items": [
+        "Configured provider first → other credentialed providers → Ollama if default → local mock",
+        "Mock returns geo-specific Valle de Aburrá response (not generic) so UI never breaks",
+        "Provider-agnostic: Groq, OpenRouter, DeepSeek, Ollama, custom endpoints"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Current State (PRD §11 — UI-First Integration)",
+      "items": [
+        "✅ Base 3D map + 10 SIATA stations geolocated",
+        "✅ Fixed sidebar (260px) + floating chat widget",
+        "⏳ Pending: 3D terrain + extruded buildings (OpenFreeMap)",
+        "⏳ Pending: Dashboard modal overlay + 5 tabs + Recharts",
+        "⏳ Pending: SSE streaming in chat + generation actions",
+        "⏳ Pending: App.tsx wiring — Dashboard button opens overlay"
+      ]
+    }
+  ]
+}
