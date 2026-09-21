@@ -18,17 +18,29 @@
 
 ## 📸 Capturas
 
-![Terramind Mapa](./docs/screenshots/dashboard.png)
+![Terramind Mapa](./docs/screenshots/home-mapa.png)
 
-*Mapa 3D del Valle de Aburrá con estaciones de calidad del aire (AQI/PM2.5), capas de clima y radar, y copiloto de IA integrado.*
+*Mapa 3D del Valle de Aburrá con comunas coloreadas por AQI, estaciones de calidad del aire (PM2.5/PM10), niveles de agua y copiloto de IA respondiendo en vivo.*
 
-![Terramind Dashboard](./docs/screenshots/tab-pronostico.png)
+![Terramind Inteligencia](./docs/screenshots/tab-inteligencia.png)
 
-*Dashboard analítico: pronóstico 48 horas, pronóstico semanal por municipio y tabs por tema (territorio, estaciones, clima, agua, vegetación).*
+*Pestaña Inteligencia: techo de mezcla estimado (capa de inversión térmica) y ranking de barrios que incumplen el estándar OMS de PM2.5.*
+
+![Terramind Pronóstico](./docs/screenshots/tab-pronostico.png)
+
+*Pestaña Pronóstico: serie 48 horas con intervalo y pronóstico semanal por día.*
 
 ![Terramind Estaciones](./docs/screenshots/tab-estaciones.png)
 
-*Red de estaciones SIATA por municipio con AQI y contaminantes en tiempo real.*
+*Pestaña Estaciones: red SIATA por municipio con AQI, PM2.5/PM10, O₃ y NO₂.*
+
+![Terramind Agua](./docs/screenshots/tab-agua.png)
+
+*Pestaña Agua: niveles del Río Medellín y quebradas desde el Geoportal SIATA en vivo, con alerta sobre el umbral de precaución.*
+
+![Terramind RAG](./docs/screenshots/tab-rag.png)
+
+*Panel RAG Documental: biblioteca de 15 documentos (normativa colombiana, guías OMS, ODS), respuestas con citas y subida de archivos para indexar.*
 
 ## ✨ ¿Qué es?
 
