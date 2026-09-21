@@ -5574,15 +5574,14 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       <div class="card">
         <div class="card-header">
           <div class="card-dot amber"></div>
-          <h3>Current State (PRD §11 — UI-First Integration)</h3>
+          <h3>Current State (verified in code)</h3>
         </div>
         <ul>
-          <li>&bull; ✅ Base 3D map + 10 SIATA stations geolocated</li>
-          <li>&bull; ✅ Fixed sidebar (260px) + floating chat widget</li>
-          <li>&bull; ⏳ Pending: 3D terrain + extruded buildings (OpenFreeMap)</li>
-          <li>&bull; ⏳ Pending: Dashboard modal overlay + 5 tabs + Recharts</li>
-          <li>&bull; ⏳ Pending: SSE streaming in chat + generation actions</li>
-          <li>&bull; ⏳ Pending: App.tsx wiring — Dashboard button opens overlay</li>
+          <li>&bull; ✅ 3D terrain + extruded buildings with toggle (AirMap, MapViewport, basemaps)</li>
+          <li>&bull; ✅ Dashboard overlay with 11 tabs wired from sidebar (App.tsx)</li>
+          <li>&bull; ✅ SSE streaming chat + generation actions (ChatWidget, openRouter)</li>
+          <li>&bull; ⏳ 100% live data without fallback (hybrid SIATA + Open-Meteo + simulated)</li>
+          <li>&bull; ⏳ Mobile responsive design (desktop-first per PRD §9)</li>
         </ul>
       </div>
     </div>

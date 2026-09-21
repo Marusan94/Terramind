@@ -169,14 +169,13 @@
     },
     {
       "dot": "amber",
-      "title": "Current State (PRD §11 — UI-First Integration)",
+      "title": "Current State (verified in code)",
       "items": [
-        "✅ Base 3D map + 10 SIATA stations geolocated",
-        "✅ Fixed sidebar (260px) + floating chat widget",
-        "⏳ Pending: 3D terrain + extruded buildings (OpenFreeMap)",
-        "⏳ Pending: Dashboard modal overlay + 5 tabs + Recharts",
-        "⏳ Pending: SSE streaming in chat + generation actions",
-        "⏳ Pending: App.tsx wiring — Dashboard button opens overlay"
+        "✅ 3D terrain + extruded buildings with toggle (AirMap, MapViewport, basemaps)",
+        "✅ Dashboard overlay with 11 tabs wired from sidebar (App.tsx)",
+        "✅ SSE streaming chat + generation actions (ChatWidget, openRouter)",
+        "⏳ 100% live data without fallback (hybrid SIATA + Open-Meteo + simulated)",
+        "⏳ Mobile responsive design (desktop-first per PRD §9)"
       ]
     }
   ]

@@ -44,7 +44,7 @@
 | Capacidad | Estado | Evidencia |
 |---|---|---|
 | Mapa 3D con terreno + edificios extruidos | ✅ Activo (con toggle) | `AirMap.tsx` (setTerrain), `MapViewport.tsx`, `basemaps.ts` (fill-extrusion) |
-| Dashboard overlay con 5 pestañas | ✅ Cableado | `App.tsx:395` (`dashboardOpen && <AirDashboard/>`) |
+| Dashboard overlay con 11 pestañas | ✅ Cableado | `App.tsx:395` (`dashboardOpen && <AirDashboard/>`) |
 | Chat con streaming SSE | ✅ Activo | `ChatWidget.tsx`, `openRouter.ts` (getReader) |
 | Datos híbridos SIATA + Open-Meteo + simulado | ✅ Activo | `valley.ts` (anti-corruption layer, 17 servicios) |
 | Backend FastAPI (copilot, health, rag, spatial) | ✅ Implementado | `apps/api/app/api/v1/endpoints/` |
@@ -160,8 +160,22 @@ Apache 2.0 — ver [LICENSE](./LICENSE).
 
 Normativa ambiental oficial indexada para el copiloto con citas (`data/rag_library/` — ver `MANIFEST.csv` y `README_INGESTA.md`):
 
-- **Normas**: Decreto 1076/2015, Ley 99/1993, Ley 1333/2009, Res. 631/2015 (vertimientos), Res. 2254/2017 (aire), Res. 627/2006 (ruido), Constitución 1991, Leyes 1931/2018 y 2169/2021 (clima), NTC-ISO 14001, NDC Colombia
-- **Nota**: los PDF de Res. 631/2254 de MinAmbiente son escaneados sin texto; el RAG indexa sus versiones HTML oficiales con texto. NDC 3.0 y E2050 (UNFCCC) requieren descarga manual.
+| Documento | Chunks | Estado |
+|---|---|---|
+| Decreto 1076/2015 — Decreto Único Sector Ambiente | 4,899 | ✅ Ingerido |
+| Ley 99/1993 — Crea MinAmbiente y SINA | 326 | ✅ Ingerido |
+| Ley 1333/2009 — Régimen sancionatorio ambiental | 108 | ✅ Ingerido |
+| Res. 627/2006 — Ruido ambiental | 145 | ✅ Ingerido |
+| Constitución 1991 — Derecho al ambiente sano | 664 | ✅ Ingerido |
+| NTC-ISO 14001/2015 — Gestión ambiental | 257 | ✅ Ingerido |
+| Ley 1931/2018 — Cambio climático | 106 | ✅ Ingerido |
+| Ley 2169/2021 — Carbono neutralidad | 175 | ✅ Ingerido |
+| NDC Colombia (MinAmbiente) | 23 | ✅ Ingerido |
+| Res. 631/2015 — Vertimientos (HTML oficial) | 346 | ✅ Ingerido |
+| Res. 2254/2017 — Calidad del aire (HTML oficial) | 17 | ✅ Ingerido |
+| Res. 631/2015 y 2254/2017 (PDF MinAmbiente) | 0 | ⚠️ Escaneados sin texto — se indexa la versión HTML |
+| NDC 3.0 y E2050 Colombia (UNFCCC) | — | ⏳ Descarga manual pendiente (ver MANIFEST) |
+
 - **Recarga**: el RAG en memoria se pierde al reiniciar el API — ver comandos de re-ingesta en `data/rag_library/README_INGESTA.md`.
 
 ---
