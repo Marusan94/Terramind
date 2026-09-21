@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
   <img src="https://img.shields.io/badge/PostGIS-3.4-336791?style=flat-square&logo=postgresql&logoColor=white" alt="PostGIS" />
-  <img src="https://img.shields.io/badge/tests-95_passing-brightgreen?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/tests-15_suites_web_+_4_api-brightgreen?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/CI-GitHub_Actions-2088FF?style=flat-square&logo=github-actions&logoColor=white" alt="CI" />
 </p>
 
@@ -39,6 +39,20 @@
 - 🤖 **Copiloto de IA**: preguntas en lenguaje natural sobre los datos, con enrutamiento multi-proveedor (Groq, Gemini, OpenRouter)
 - 📊 **Dashboards**: AQI, PM2.5/PM10, histórico, alertas y reportes por zona
 
+## 📍 Estado del proyecto (verificado en código)
+
+| Capacidad | Estado | Evidencia |
+|---|---|---|
+| Mapa 3D con terreno + edificios extruidos | ✅ Activo (con toggle) | `AirMap.tsx` (setTerrain), `MapViewport.tsx`, `basemaps.ts` (fill-extrusion) |
+| Dashboard overlay con 5 pestañas | ✅ Cableado | `App.tsx:395` (`dashboardOpen && <AirDashboard/>`) |
+| Chat con streaming SSE | ✅ Activo | `ChatWidget.tsx`, `openRouter.ts` (getReader) |
+| Datos híbridos SIATA + Open-Meteo + simulado | ✅ Activo | `valley.ts` (anti-corruption layer, 17 servicios) |
+| Backend FastAPI (copilot, health, rag, spatial) | ✅ Implementado | `apps/api/app/api/v1/endpoints/` |
+| RAG documental + OmniRoute multi-LLM | ✅ Implementado | `apps/api/app/rag/`, `core/llm.py` |
+| Pronóstico 48h/semanal, alertas, compartir | ✅ Implementado | `predictions.ts`, `AlertsPanel.tsx`, `share.ts` |
+| Datos 100% en vivo sin fallback | ⏳ Pendiente | UI opera con SIATA histórico + Open-Meteo + simulado determinista |
+| Diseño móvil responsivo | ⏳ Pendiente | Desktop-first (ver PRD §9) |
+
 ## 🛠️ Stack
 
 | Capa | Tecnologías |
@@ -46,7 +60,7 @@
 | Frontend | React 18, TypeScript, Vite, Tailwind CSS, Zustand, Recharts, MapLibre GL, deck.gl |
 | Backend | Python, FastAPI, Pydantic v2, enrutamiento multi-LLM |
 | Datos | PostgreSQL + PostGIS, Redis, APIs REST (SIATA, Open-Meteo, RainViewer) |
-| Calidad | Vitest + Testing Library (95 tests), pytest backend (35 tests), ESLint, GitHub Actions (CI) |
+| Calidad | Vitest + Testing Library (15 suites), pytest backend (4 módulos), ESLint, GitHub Actions (CI) |
 | Deploy | Docker, Vercel (frontend), Railway/Fly.io (backend) |
 
 ## ⚡ Uso local (2 minutos, sin backend)
@@ -86,13 +100,13 @@ cp .env.example .env
 ## 🧪 Tests
 
 ```bash
-cd apps/web && npm test        # 8 tests Vitest
-cd apps/api && pytest          # tests backend
+cd apps/web && npm test        # 15 suites Vitest
+cd apps/api && pytest          # 4 módulos de tests backend
 ```
 
 ## 🏗️ Arquitectura
 
-![Terramind Architecture](./docs/architecture-terramind.png)
+![Terramind Architecture](./docs/architecture-terramind-dark.png)
 
 *Diagrama interactivo: [`docs/architecture-terramind.html`](./docs/architecture-terramind.html) — ábrelo en el navegador para explorar nodos, trazar rutas (`R`), ver alcance upstream/downstream, comparar roles (`L`), modo presentación (`F`) y exportar (`E`). Fuente versionada: [`docs/architecture-terramind.json`](./docs/architecture-terramind.json) (generado con [Archify](https://github.com/tt-a1i/archify), validación showcase 9/9).*
 
