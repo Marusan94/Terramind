@@ -11,6 +11,7 @@ import AirQualityOverview from './components/AirQualityOverview';
 import ChatWidget from './components/ChatWidget';
 import AlertsPanel from './components/AlertsPanel';
 import AuthPrompt from './components/AuthPrompt';
+import AuthHint from './components/AuthHint';
 import { shouldShowAuthPrompt } from './services/auth';
 import { GraphModal, ArchitectureModal } from './components/SystemViews';
 import { AIR_QUALITY_STATIONS, generateRealisticData, calculateAQI } from './data/stations';
@@ -59,12 +60,13 @@ export default function App() {
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
   const [archOpen, setArchOpen] = useState(false);
-  // Sugerencia de registro: una sola vez, solo si no tiene cuenta.
+  // Aviso pequeño al entrar (una sola vez); el auth completo solo si tocan.
+  const [authHintOpen, setAuthHintOpen] = useState(false);
   const [authPromptOpen, setAuthPromptOpen] = useState(false);
 
   useEffect(() => {
     if (shouldShowAuthPrompt()) {
-      const t = window.setTimeout(() => setAuthPromptOpen(true), 1200);
+      const t = window.setTimeout(() => setAuthHintOpen(true), 1200);
       return () => window.clearTimeout(t);
     }
   }, []);
@@ -416,6 +418,12 @@ export default function App() {
         {ragOpen && <RagLibrary onClose={() => setRagOpen(false)} />}
         {graphOpen && <GraphModal onClose={() => setGraphOpen(false)} />}
         {archOpen && <ArchitectureModal onClose={() => setArchOpen(false)} />}
+        {authHintOpen && (
+          <AuthHint
+            onRegister={() => { setAuthHintOpen(false); setAuthPromptOpen(true); }}
+            onDismiss={() => setAuthHintOpen(false)}
+          />
+        )}
         {authPromptOpen && (
           <AuthPrompt
             onRegister={() => { setAuthPromptOpen(false); setAlertsOpen(true); }}
