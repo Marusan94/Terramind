@@ -47,11 +47,8 @@ const SIATA_PARAMS: Record<string, 'pm25' | 'pm10' | 'o3' | 'no2'> = {
   no2: 'no2',
 };
 
-// En dev (y túnel) se sirve por el proxy de Vite para evitar CORS.
-const SIATA_BASE =
-  typeof window !== 'undefined' && window.location.port === '3000'
-    ? '/api/siata/EntregaData1'
-    : 'https://siata.gov.co/EntregaData1';
+// Proxy mismo-origen primero (Vite en dev, Vercel en prod), directo después.
+const SIATA_BASES = ['/api/siata/EntregaData1', 'https://siata.gov.co/EntregaData1'];
 
 const MUNICIPALITIES = [
   'Girardota', 'Barbosa', 'Copacabana', 'Bello', 'Medellín', 'Medellin',
@@ -92,17 +89,25 @@ async function fetchJson(url: string, timeoutMs = 25000): Promise<any> {
 /** Descarga el dump "_Last" (últimas ~24-48h) de un contaminante. */
 export async function fetchSiataLast(param: keyof typeof SIATA_PARAMS): Promise<SiataMeasurement[]> {
   const key = SIATA_PARAMS[param];
-  const json = await fetchJson(`${SIATA_BASE}/Datos_SIATA_Aire_AQ_${param}_Last.json`);
-  const list = Array.isArray(json?.measurements) ? json.measurements : [];
-  return list.map((m: any) => ({
-    station: String(m.location ?? 'desconocida'),
-    parameter: key,
-    value: typeof m.value === 'number' ? m.value : -9999,
-    unit: String(m.unit ?? 'µg/m³'),
-    utc: String(m.date?.utc ?? ''),
-    lat: Number(m.coordinates?.latitude ?? 0),
-    lon: Number(m.coordinates?.longitude ?? 0),
-  }));
+  let last: unknown = null;
+  for (const base of SIATA_BASES) {
+    try {
+      const json = await fetchJson(`${base}/Datos_SIATA_Aire_AQ_${param}_Last.json`);
+      const list = Array.isArray(json?.measurements) ? json.measurements : [];
+      return list.map((m: any) => ({
+        station: String(m.location ?? 'desconocida'),
+        parameter: key,
+        value: typeof m.value === 'number' ? m.value : -9999,
+        unit: String(m.unit ?? 'µg/m³'),
+        utc: String(m.date?.utc ?? ''),
+        lat: Number(m.coordinates?.latitude ?? 0),
+        lon: Number(m.coordinates?.longitude ?? 0),
+      }));
+    } catch (e) {
+      last = e;
+    }
+  }
+  throw last instanceof Error ? last : new Error('SIATA sin respuesta');
 }
 
 export interface SiataDataset {

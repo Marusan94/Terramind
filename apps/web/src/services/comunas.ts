@@ -35,10 +35,9 @@ export interface MiniStation {
   quality: 'VALID' | 'MISSING' | 'SIMULATED';
 }
 
-const GEO_BASE =
-  typeof window !== 'undefined' && window.location.port === '3000'
-    ? '/api/medellin'
-    : 'https://www.medellin.gov.co/servidormapas';
+// Proxy mismo-origen primero (Vite en dev, Vercel en prod), directo después.
+// El directo falla por CORS en el navegador; el proxy es server-side.
+const GEO_BASE = '/api/medellin';
 
 const QUERY =
   '/rest/services/mapas_nacionales/VC_Limite_Politico_Admtivo/MapServer/1/query' +

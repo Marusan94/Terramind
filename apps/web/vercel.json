@@ -9,6 +9,34 @@
         "destination": "https://calendar-ia.onrender.com/api/v1/:path*"
     },
     {
+      "source": "/api/medellin/:path*",
+      "destination": "https://www.medellin.gov.co/servidormapas/:path*"
+    },
+    {
+      "source": "/api/geoportal/:path*",
+      "destination": "https://geoportal.siata.gov.co/:path*"
+    },
+    {
+      "source": "/api/siata/:path*",
+      "destination": "https://siata.gov.co/:path*"
+    },
+    {
+      "source": "/api/firms/:path*",
+      "destination": "https://firms.modaps.eosdis.nasa.gov/:path*"
+    },
+    {
+      "source": "/api/llm/groq/:path*",
+      "destination": "https://api.groq.com/openai/v1/:path*"
+    },
+    {
+      "source": "/api/llm/openrouter/:path*",
+      "destination": "https://openrouter.ai/api/v1/:path*"
+    },
+    {
+      "source": "/api/llm/gemini/:path*",
+      "destination": "https://generativelanguage.googleapis.com/v1beta/:path*"
+    },
+    {
       "source": "/((?!api/|assets/|system/|favicon.svg|manifest.json|sw.js|icon-.*|screenshot\\.png|apple-touch-icon\\.png).*)",
       "destination": "/index.html"
     }

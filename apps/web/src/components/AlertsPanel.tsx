@@ -163,19 +163,32 @@ export default function AlertsPanel({ open, onClose, avgAqi, stations, source, d
           {perm !== 'granted' && perm !== 'unsupported' && ' (se piden al activar)'}
         </div>
 
-        <div style={{ background: '#0d0d0f', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, marginTop: 12, padding: 16, marginBottom: 4, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)', fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif" }}>
-          <strong style={{ fontSize: 14, color: '#f5f5f7' }}>👤 Cuenta (opcional)</strong>
-          <div style={{ fontSize: 12, lineHeight: 1.6, color: '#a1a1a6', margin: '6px 0 10px' }}>
-            {profile
-              ? `Registrado como ${profile.email}. Te avisaremos ahí cuando haya alertas.`
-              : 'Regístrate con tu email para recibir las alertas. Sin cuenta todo sigue funcionando.'}
+        <div className="mac-pop" style={{ background: 'linear-gradient(180deg, #1e1e22 0%, #0e0e10 100%)', border: '0.5px solid rgba(255,255,255,0.14)', borderRadius: 16, marginTop: 12, padding: 16, marginBottom: 4, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)', fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif" }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+            <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(180deg, #5e5ce6 0%, #0a84ff 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, boxShadow: '0 4px 14px rgba(10,132,255,0.4), inset 0 1px 0 rgba(255,255,255,0.35)', flexShrink: 0 }}>
+              {profile ? (profile.displayName || profile.email).charAt(0).toUpperCase() : '👤'}
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#f5f5f7', letterSpacing: '-0.01em' }}>
+                {profile ? (profile.displayName || 'Cuenta registrada') : 'Cuenta (opcional)'}
+              </div>
+              <div style={{ fontSize: 11.5, color: '#8e8e93' }}>
+                {profile ? profile.email : 'Recibe las alertas en tu email'}
+              </div>
+            </div>
           </div>
+          {!profile && (
+            <div style={{ fontSize: 12, lineHeight: 1.6, color: '#a1a1a6', margin: '2px 0 10px' }}>
+              Sin cuenta todo sigue funcionando.
+            </div>
+          )}
           <input
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="Tu nombre"
             aria-label="Nombre"
-            style={{ display: 'block', width: '100%', marginBottom: 8, padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#f5f5f7', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
+            className="mac-input"
+            style={{ display: profile ? 'none' : 'block', width: '100%', marginBottom: 8, padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#f5f5f7', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
           />
           <input
             value={email}
@@ -183,15 +196,18 @@ export default function AlertsPanel({ open, onClose, avgAqi, stations, source, d
             placeholder="tu@email.com"
             inputMode="email"
             aria-label="Email para alertas"
-            style={{ display: 'block', width: '100%', marginBottom: 10, padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#f5f5f7', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
+            className="mac-input"
+            style={{ display: profile ? 'none' : 'block', width: '100%', marginBottom: 10, padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#f5f5f7', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
           />
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={saveProfile} style={{ flex: 1, padding: '10px 14px', background: '#f5f5f7', border: 'none', borderRadius: 10, color: '#0d0d0f', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-              💾 Guardar cuenta
-            </button>
+            {!profile && (
+              <button onClick={saveProfile} className="mac-btn-primary" style={{ flex: 1, padding: '10px 14px', background: '#f5f5f7', border: 'none', borderRadius: 10, color: '#0d0d0f', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                💾 Guardar cuenta
+              </button>
+            )}
             {profile && (
-              <button onClick={clearProfile} title="Borra tu cuenta de este navegador" style={{ padding: '10px 14px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, color: '#a1a1a6', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
-                🗑 Salir
+              <button onClick={clearProfile} className="mac-btn-ghost" title="Borra tu cuenta de este navegador" style={{ flex: 1, padding: '10px 14px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, color: '#a1a1a6', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                🗑 Cerrar sesión
               </button>
             )}
           </div>

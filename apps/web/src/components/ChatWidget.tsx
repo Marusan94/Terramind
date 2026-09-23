@@ -276,6 +276,20 @@ interface ChatPos {
 const CHAT_POS_KEY = 'terramind-chat-pos';
 const SMALL_SCREEN_PX = 768;
 
+/** Alto aprox que el panel necesita HACIA ARRIBA del botón al abrir. */
+export const PANEL_NEED_ABOVE = 560;
+
+/**
+ * Ajusta la posición al abrir: garantiza `needAbove` px libres sobre el
+ * botón (bajando el widget si está muy alto) sin sacarlo por abajo.
+ * Función pura para poder testearla.
+ */
+export function fitAbove(pos: ChatPos, vh: number): ChatPos {
+  const maxTop = Math.max(8, vh - 70);
+  const minTop = Math.min(PANEL_NEED_ABOVE, Math.max(8, vh - 78));
+  return { left: pos.left, top: Math.min(Math.max(pos.top, minTop), maxTop) };
+}
+
 /** En pantallas pequeñas el chat va anclado abajo: se ignora lo guardado. */
 export function isSmallScreen(): boolean {
   return typeof window !== 'undefined' && window.innerWidth < SMALL_SCREEN_PX;
@@ -448,13 +462,13 @@ export default function ChatWidget({
       suppressToggleClick.current = false;
       return;
     }
-    // Al abrir, garantiza espacio hacia arriba: si el panel (~520px + botón)
-    // quedaría cortado por el borde superior, sube el widget antes de abrir.
+    // Al abrir, el panel ocupa ~560px HACIA ARRIBA del botón: si el botón
+    // está muy alto, se BAJA el widget para que el panel quepa en pantalla.
+    // (Subirlo era el bug: mandaba el panel fuera del borde superior.)
     if (!isOpen && pos && !isSmallScreen()) {
-      const need = 520 + 90;
       const vh = window.innerHeight || 768;
-      if (pos.top + need > vh) {
-        const next = clampChatPos({ left: pos.left, top: Math.max(8, vh - need) }, 380, 120);
+      const next = fitAbove(pos, vh);
+      if (next.top !== pos.top) {
         setPos(next);
         try {
           localStorage.setItem(CHAT_POS_KEY, JSON.stringify(next));

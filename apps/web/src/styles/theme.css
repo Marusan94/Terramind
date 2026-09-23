@@ -1279,3 +1279,90 @@ body.command-mode .cmd-title {
     align-items: flex-end;
   }
 }
+
+/* ============================================================
+ * VIEWER FULLSCREEN (Grafo + Arquitectura por iframe).
+ * Clase propia: no la afecta el bottom-sheet de .modal-overlay.
+ * ============================================================ */
+.frame-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(4, 4, 6, 0.86);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  animation: frameIn 0.22s ease-out;
+}
+
+@keyframes frameIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.frame-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.frame-view {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: #0a0a0c;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 768px) {
+  .frame-overlay { padding: 8px; }
+  .frame-bar { font-size: 12px; }
+  .frame-view { border-radius: 10px; }
+}
+
+/* ============================================================
+ * AUTH ESTILO MAC — entrada suave para prompt y tarjeta.
+ * ============================================================ */
+@keyframes macPop {
+  from { opacity: 0; transform: scale(0.94) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.mac-pop { animation: macPop 0.28s cubic-bezier(0.2, 0.9, 0.25, 1.2); }
+
+.mac-btn-primary {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.mac-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.14);
+}
+
+.mac-btn-primary:active { transform: translateY(0) scale(0.99); }
+
+.mac-btn-ghost {
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mac-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f5f5f7;
+}
+
+.mac-input { transition: border-color 0.15s ease, background 0.15s ease; }
+
+.mac-input:focus {
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.mac-input::placeholder { color: #6e6e73; }

@@ -30,10 +30,8 @@ export interface HydroResult {
   updatedAt: number; // epoch ms del dato más reciente
 }
 
-const GEO_BASE =
-  typeof window !== 'undefined' && window.location.port === '3000'
-    ? '/api/geoportal'
-    : 'https://geoportal.siata.gov.co';
+// Proxy mismo-origen primero (Vite en dev, Vercel en prod), directo después.
+const GEO_BASES = ['/api/geoportal', 'https://geoportal.siata.gov.co'];
 
 // Río Medellín de sur a norte + 1 quebrada representativa (Q. La Iguana).
 const FEATURED = [106, 520, 331, 238];
@@ -48,6 +46,19 @@ async function fetchJson(url: string, timeoutMs = 25000): Promise<any> {
   } finally {
     clearTimeout(t);
   }
+}
+
+/** Prueba cada base en orden (proxy, directo) y devuelve la primera que responda. */
+async function fetchFirst(path: string, timeoutMs = 25000): Promise<any> {
+  let last: unknown = null;
+  for (const base of GEO_BASES) {
+    try {
+      return await fetchJson(`${base}${path}`, timeoutMs);
+    } catch (e) {
+      last = e;
+    }
+  }
+  throw last instanceof Error ? last : new Error('Hidro sin respuesta');
 }
 
 function parseName(nombre: string): { river: string; site: string } {
@@ -71,7 +82,7 @@ function trendOf(y: unknown): 'up' | 'down' | 'stable' {
 
 /** Niveles en vivo de las estaciones destacadas. Lanza si no hay datos. */
 export async function loadHydroGauges(): Promise<HydroResult> {
-  const col = await fetchJson(`${GEO_BASE}/fastgeoapi/geodata/geodataJson/2/niveles`);
+  const col = await fetchFirst('/fastgeoapi/geodata/geodataJson/2/niveles');
   const feats: any[] = Array.isArray(col?.features) ? col.features : [];
   const byCode = new Map<number, any>();
   for (const f of feats) {
@@ -85,8 +96,8 @@ export async function loadHydroGauges(): Promise<HydroResult> {
     FEATURED.map(async codigo => {
       const f = byCode.get(codigo);
       if (!f) return;
-      const det = await fetchJson(
-        `${GEO_BASE}/fastgeoapi/geodata/geographJson/3/nivel/${codigo}`,
+      const det = await fetchFirst(
+        `/fastgeoapi/geodata/geographJson/3/nivel/${codigo}`,
       ).catch(() => null);
       const info = det?.info;
       if (!info || typeof info.nivelActual !== 'number') return;

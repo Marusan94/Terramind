@@ -1,8 +1,7 @@
 // Terramind Service Worker
-// v1.0: navegaciones con network-first (evita pantalla blanca tras un deploy
-// en movil: el index.html viejo apuntaba a assets con hash ya eliminados).
-// Solo los assets con hash (/assets/*) y tiles/API van cache-first.
-const CACHE_NAME = 'terramind-v1.0';
+// v1.1: incluye /system/* como navegable por red + purga cachés viejas
+// (teléfonos atascados en el SW anterior se actualizan solos al visitar).
+const CACHE_NAME = 'terramind-v1.1';
 const TILE_CACHE = 'terramind-tiles-v1';
 const API_CACHE = 'terramind-api-v1';
 
