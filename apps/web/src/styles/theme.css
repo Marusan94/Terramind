@@ -1,6 +1,7 @@
 /* Terramind - Cursor IDE Dark Theme */
 
 :root {
+  color-scheme: dark;
   --bg: #000000;
   --bg-1: #0a0a0a;
   --bg-2: #111111;
@@ -1366,6 +1367,18 @@ body.command-mode .cmd-title {
 }
 
 .mac-input::placeholder { color: #6e6e73; }
+
+/* Selects nativos: la lista desplegable la pinta el SO; se fuerza oscura
+   para que la letra siempre se lea (blanco sobre blanco era el bug). */
+select option {
+  background: #1b1b1f;
+  color: #f5f5f7;
+}
+
+select optgroup {
+  background: #1b1b1f;
+  color: #a1a1a6;
+}
 
 /* ============================================================
  * AUTH SPLIT (AuthPrompt): formulario opaco + foto del Valle.

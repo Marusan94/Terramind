@@ -58,7 +58,8 @@ export function isValidEmail(e: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
 }
 
-const PROMPT_KEY = 'terramind.auth.prompted.v1';
+// v2: el aviso se rediseñó (split con foto); se muestra de nuevo una vez.
+const PROMPT_KEY = 'terramind.auth.prompted.v2';
 
 /** ¿Ya se le sugirió registrarse al entrar? (para no insistir). */
 export function hasSeenAuthPrompt(): boolean {
@@ -75,4 +76,9 @@ export function markAuthPromptSeen(): void {
   } catch {
     // sin almacenamiento: no se vuelve a sugerir en la sesión
   }
+}
+
+/** ¿Debe mostrarse el aviso al entrar? Solo sin cuenta y sin haberlo visto. */
+export function shouldShowAuthPrompt(): boolean {
+  return !hasSeenAuthPrompt() && loadAuth() === null;
 }

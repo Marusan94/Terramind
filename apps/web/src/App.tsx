@@ -11,7 +11,7 @@ import AirQualityOverview from './components/AirQualityOverview';
 import ChatWidget from './components/ChatWidget';
 import AlertsPanel from './components/AlertsPanel';
 import AuthPrompt from './components/AuthPrompt';
-import { hasSeenAuthPrompt, loadAuth } from './services/auth';
+import { shouldShowAuthPrompt } from './services/auth';
 import { GraphModal, ArchitectureModal } from './components/SystemViews';
 import { AIR_QUALITY_STATIONS, generateRealisticData, calculateAQI } from './data/stations';
 import { loadValleyData, ValleyData } from './services/valley';
@@ -63,7 +63,7 @@ export default function App() {
   const [authPromptOpen, setAuthPromptOpen] = useState(false);
 
   useEffect(() => {
-    if (!hasSeenAuthPrompt() && !loadAuth()) {
+    if (shouldShowAuthPrompt()) {
       const t = window.setTimeout(() => setAuthPromptOpen(true), 1200);
       return () => window.clearTimeout(t);
     }

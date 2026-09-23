@@ -1,6 +1,6 @@
 /** Auth opcional: perfil local con validación de email. */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { clearAuth, hasSeenAuthPrompt, isValidEmail, loadAuth, markAuthPromptSeen, saveAuth } from '../services/auth';
+import { clearAuth, hasSeenAuthPrompt, isValidEmail, loadAuth, markAuthPromptSeen, saveAuth, shouldShowAuthPrompt } from '../services/auth';
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -45,5 +45,19 @@ describe('sugerencia al entrar', () => {
     expect(hasSeenAuthPrompt()).toBe(false);
     markAuthPromptSeen();
     expect(hasSeenAuthPrompt()).toBe(true);
+  });
+
+  it('se muestra sin cuenta y sin haberlo visto', () => {
+    expect(shouldShowAuthPrompt()).toBe(true);
+  });
+
+  it('no se muestra si ya se vio', () => {
+    markAuthPromptSeen();
+    expect(shouldShowAuthPrompt()).toBe(false);
+  });
+
+  it('no se muestra si ya hay cuenta', () => {
+    saveAuth({ displayName: '', email: 'santi@udea.edu.co', wantsAlerts: true });
+    expect(shouldShowAuthPrompt()).toBe(false);
   });
 });
