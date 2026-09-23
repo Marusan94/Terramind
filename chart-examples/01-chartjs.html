@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chart.js - PM2.5 Time Series</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: system-ui; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+    .chart-container { position: relative; height: 400px; background: #fafafa; border-radius: 8px; padding: 20px; }
+    h1 { color: #1a1a2e; }
+    .meta { color: #666; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>📊 Chart.js — PM2.5 Calidad Aire (Tiempo Real)</h1>
+  <p class="meta">Simulación: 24h · Actualización cada 5 min · Umbral OMS: 15 µg/m³</p>
+  <div class="chart-container">
+    <canvas id="pm25Chart"></canvas>
+  </div>
+  <script>
+    const ctx = document.getElementById('pm25Chart');
+    const hours = Array.from({length: 24}, (_, i) => `${i}:00`);
+    const data = hours.map(() => 8 + Math.random() * 25);
+    const whoLine = Array(24).fill(15);
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: hours,
+        datasets: [
+          {
+            label: 'PM2.5 (µg/m³)',
+            data: data,
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239,68,68,0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3,
+            pointHoverRadius: 6
+          },
+          {
+            label: 'Umbral OMS (15 µg/m³)',
+            data: whoLine,
+            borderColor: '#f59e0b',
+            borderDash: [8, 4],
+            fill: false,
+            pointRadius: 0,
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: { backgroundColor: '#1a1a2e', padding: 12, titleFont: {size: 14}, bodyFont: {size: 13} }
+        },
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: 'µg/m³' }, grid: { color: '#e5e7eb' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -27,7 +27,8 @@ interface Props {
 }
 
 const OPTIONS = [51, 101, 151];
-const VALLE_PHOTO = 'https://upload.wikimedia.org/wikipedia/commons/8/88/Panoramica_medellin_colombia.JPG';
+const VALLE_PHOTO = '/valle.jpg';
+const VALLE_PHOTO_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/8/88/Panoramica_Centro_De_Medellin.jpg';
 
 const shell: React.CSSProperties = {
   display: 'flex',
@@ -254,7 +255,7 @@ export default function AlertsPanel({ open, onClose, avgAqi, stations, source, d
               src={photoSrc}
               alt="Panorámica del Valle de Aburrá, Medellín"
               onError={() => {
-                if (photoSrc !== '/valle.jpg') setPhotoSrc('/valle.jpg');
+                if (photoSrc === VALLE_PHOTO) setPhotoSrc(VALLE_PHOTO_FALLBACK);
                 else setPhotoOk(false);
               }}
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
@@ -264,7 +265,7 @@ export default function AlertsPanel({ open, onClose, avgAqi, stations, source, d
           <div style={{ position: 'absolute', left: 18, right: 18, bottom: 14, fontSize: 11.5, color: 'rgba(255,255,255,0.8)', textShadow: '0 1px 8px rgba(0,0,0,0.7)', lineHeight: 1.5 }}>
             Valle de Aburrá · Medellín, Colombia
             <br />
-            <span style={{ opacity: 0.7 }}>Foto: Yair Leandro Mesa / Wikimedia Commons (CC BY-SA)</span>
+            <span style={{ opacity: 0.7 }}>Foto: DAIRO CORREA / Wikimedia Commons (CC BY-SA)</span>
           </div>
         </div>
       </div>

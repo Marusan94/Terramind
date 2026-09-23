@@ -19,7 +19,7 @@ export default function AuthHint({ onRegister, onDismiss }: Props) {
     <div
       role="status"
       aria-label="Aviso de alertas"
-      className="mac-pop"
+      className="mac-pop auth-hint"
       style={{
         position: 'fixed',
         left: '50%',
@@ -65,9 +65,10 @@ export default function AuthHint({ onRegister, onDismiss }: Props) {
         aria-label="Descartar aviso"
         className="mac-btn-ghost"
         style={{
-          width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+          width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
           background: 'rgba(255,255,255,0.07)', border: 'none',
-          color: '#a1a1a6', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
+          color: '#a1a1a6', fontSize: 17, cursor: 'pointer', fontFamily: 'inherit',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
       >
         ×

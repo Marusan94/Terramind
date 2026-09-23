@@ -1393,4 +1393,9 @@ select optgroup {
     min-height: 150px;
     flex: none;
   }
+  /* La píldora sube encima del botón flotante del chat (56px + margen),
+     que si no la tapa y la × no recibe el toque. */
+  .auth-hint {
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  }
 }

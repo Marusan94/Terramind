@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chart Examples - Terramind Analytics</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui; max-width: 900px; margin: 0 auto; padding: 40px 20px; background: #f8fafc; }
+    h1 { color: #1a1a2e; margin-bottom: 8px; }
+    .subtitle { color: #64748b; margin-bottom: 40px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; transition: transform 0.2s, box-shadow 0.2s; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+    .card h3 { margin: 0 0 8px; font-size: 1.1rem; color: #1e293b; }
+    .card p { margin: 0 0 16px; color: #64748b; font-size: 0.9rem; }
+    .tags { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+    .tag { font-size: 0.7rem; padding: 3px 8px; border-radius: 999px; background: #e2e8f0; color: #475569; }
+    .tag.lib { background: #dbeafe; color: #1e40af; }
+    .btn { display: inline-block; padding: 10px 20px; background: #3b82f6; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 500; transition: background 0.2s; }
+    .btn:hover { background: #2563eb; }
+    .btn.secondary { background: #fff; color: #3b82f6; border: 1px solid #3b82f6; }
+    .btn.secondary:hover { background: #eff6ff; }
+    .actions { display: flex; gap: 10px; }
+  </style>
+</head>
+<body>
+  <h1>📊 Ejemplos Visuales - Analytics & Charts</h1>
+  <p class="subtitle">Abre cada ejemplo en tu navegador. Son archivos HTML estáticos (CDN), no requieren instalación.</p>
+
+  <div class="cards">
+    <article class="card">
+      <h3>1. Chart.js — Time Series</h3>
+      <p>Serie temporal PM2.5 con umbral OMS. Simple, ligero, React-ready via <code>react-chartjs-2</code>.</p>
+      <div class="tags"><span class="tag lib">Chart.js</span><span class="tag">Canvas</span><span class="tag">Responsive</span></div>
+      <div class="actions"><a class="btn" href="01-chartjs.html" target="_blank">Ver Demo</a></div>
+    </article>
+
+    <article class="card">
+      <h3>2. ApexCharts — Dashboard Multi-Métrica</h3>
+      <p>Tres gráficos: área multi-serie, barras alertas, donut fuentes. Tema dark, interactivo, annotations.</p>
+      <div class="tags"><span class="tag lib">ApexCharts</span><span class="tag">SVG</span><span class="tag">Dark Mode</span></div>
+      <div class="actions"><a class="btn" href="02-apexcharts.html" target="_blank">Ver Demo</a></div>
+    </article>
+
+    <article class="card">
+      <h3>3. ECharts — Heatmap Geoespacial</h3>
+      <p>Mapa de calor interactivo (Valle de Aburrá). Capas: PM2.5, PM10, NO₂, Temp. Zoom/pan nativo.</p>
+      <div class="tags"><span class="tag lib">ECharts</span><span class="tag">Canvas</span><span class="tag">Geo</span></div>
+      <div class="actions"><a class="btn" href="03-echarts-map.html" target="_blank">Ver Demo</a></div>
+    </article>
+
+    <article class="card">
+      <h3>4. Tremor-style Dashboard</h3>
+      <p>Layout completo: sidebar, KPIs cards, charts grid. Estilo shadcn/Tremor. Listo para copiar a React.</p>
+      <div class="tags"><span class="tag lib">Chart.js</span><span class="tag">CSS Grid</span><span class="tag">Dashboard</span></div>
+      <div class="actions"><a class="btn" href="04-tremor-dashboard.html" target="_blank">Ver Demo</a></div>
+    </article>
+
+    <article class="card">
+      <h3>5. Observable Plot — EDA Rápida</h3>
+      <p>Scatter, hexbin, ridge plot, barras. Ideal para exploración en notebooks. D3 simplificado.</p>
+      <div class="tags"><span class="tag lib">Observable Plot</span><span class="tag">D3</span><span class="tag">ESM</span></div>
+      <div class="actions"><a class="btn" href="05-observable-plot.html" target="_blank">Ver Demo</a></div>
+    </article>
+
+    <article class="card" style="border-color: #a855f7; background: linear-gradient(135deg, #faf5ff 0%, #fff 100%);">
+      <h3>6. 🧠 Three.js — 3D Neural Graph LIVE</h3>
+      <p><strong>Lo que pediste:</strong> Neuronas en 3D con conexiones (sinapsis), variables moviéndose en tiempo real, force-directed / capas / esfera / espiral. Hover para ver detalles de cada neurona.</p>
+      <div class="tags"><span class="tag lib">Three.js</span><span class="tag">WebGL</span><span class="tag">Force-Directed</span><span class="tag">Real-time</span></div>
+      <div class="actions"><a class="btn" style="background: linear-gradient(135deg, #a855f7, #3b82f6);" href="06-3d-neural-graph.html" target="_blank">Ver 3D Neural Graph</a></div>
+    </article>
+  </div>
+
+  <hr style="margin: 40px 0; border-color: #e2e8f0;">
+  <h3>🚀 Integración en tu stack (Terramind = React + Vite + Tailwind + shadcn/ui)</h3>
+  <pre style="background:#1e293b;color:#e2e8f0;padding:20px;border-radius:8px;overflow:auto"><code># Opción A: Tremor (recomendado - shadcn compatible)
+npm install @tremor/react recharts
+
+# Opción B: Nivo (bonito, D3-based)
+npm install @nivo/core @nivo/line @nivo/bar @nivo/geo
+
+# Opción C: Recharts (simple, declarativo)
+npm install recharts
+
+# Opción D: Chart.js (ligero, canvas)
+npm install chart.js react-chartjs-2 chartjs-adapter-date-fns
+
+# Opción E: ECharts (geo, 3D, high perf)
+npm install echarts echarts-for-react</code></pre>
+
+  <p style="margin-top: 20px; color: #64748b;">💡 Tip: Usa <code>graphify query "analytics module"</code> en tu repo para ver tu arquitectura actual antes de integrar.</p>
+</body>
+</html>

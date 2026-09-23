@@ -87,10 +87,8 @@ export default function AuthPrompt({ onRegister, onDismiss }: Props) {
   const [email, setEmail] = useState('');
   const [remember, setRemember] = useState(true);
   const [msg, setMsg] = useState('');
-  // Foto: remota primero, copia local después, degradado si no hay red.
-  const [photoSrc, setPhotoSrc] = useState(
-    'https://upload.wikimedia.org/wikipedia/commons/8/88/Panoramica_medellin_colombia.JPG',
-  );
+  // Foto local primero (rápida y offline); respaldo remoto; degradado si no hay red.
+  const [photoSrc, setPhotoSrc] = useState('/valle.jpg');
   const [photoOk, setPhotoOk] = useState(true);
 
   const close = (fn: () => void) => () => {
@@ -216,8 +214,9 @@ export default function AuthPrompt({ onRegister, onDismiss }: Props) {
               src={photoSrc}
               alt="Panorámica del Valle de Aburrá, Medellín"
               onError={() => {
-                if (photoSrc !== '/valle.jpg') setPhotoSrc('/valle.jpg');
-                else setPhotoOk(false);
+                if (photoSrc === '/valle.jpg') {
+                  setPhotoSrc('https://upload.wikimedia.org/wikipedia/commons/8/88/Panoramica_Centro_De_Medellin.jpg');
+                } else setPhotoOk(false);
               }}
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
             />
@@ -243,7 +242,7 @@ export default function AuthPrompt({ onRegister, onDismiss }: Props) {
           }}>
             Valle de Aburrá · Medellín, Colombia
             <br />
-            <span style={{ opacity: 0.7 }}>Foto: Yair Leandro Mesa / Wikimedia Commons (CC BY-SA)</span>
+            <span style={{ opacity: 0.7 }}>Foto: DAIRO CORREA / Wikimedia Commons (CC BY-SA)</span>
           </div>
         </div>
       </div>
