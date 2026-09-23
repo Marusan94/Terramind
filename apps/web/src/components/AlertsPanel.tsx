@@ -163,17 +163,19 @@ export default function AlertsPanel({ open, onClose, avgAqi, stations, source, d
           {perm !== 'granted' && perm !== 'unsupported' && ' (se piden al activar)'}
         </div>
 
-        <div style={{ borderTop: '1px solid var(--border)', marginTop: 12, paddingTop: 12, marginBottom: 4 }}>
-          <strong style={{ fontSize: 13 }}>👤 Cuenta (opcional)</strong>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 8px' }}>
-            Solo para avisarte por email cuando haya alertas. Sin cuenta todo sigue funcionando.
+        <div style={{ background: '#0d0d0f', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, marginTop: 12, padding: 16, marginBottom: 4, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)', fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif" }}>
+          <strong style={{ fontSize: 14, color: '#f5f5f7' }}>👤 Cuenta (opcional)</strong>
+          <div style={{ fontSize: 12, lineHeight: 1.6, color: '#a1a1a6', margin: '6px 0 10px' }}>
+            {profile
+              ? `Registrado como ${profile.email}. Te avisaremos ahí cuando haya alertas.`
+              : 'Regístrate con tu email para recibir las alertas. Sin cuenta todo sigue funcionando.'}
           </div>
           <input
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="Tu nombre"
             aria-label="Nombre"
-            style={{ display: 'block', width: '100%', marginBottom: 6, padding: 8, background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text)' }}
+            style={{ display: 'block', width: '100%', marginBottom: 8, padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#f5f5f7', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
           />
           <input
             value={email}
@@ -181,19 +183,19 @@ export default function AlertsPanel({ open, onClose, avgAqi, stations, source, d
             placeholder="tu@email.com"
             inputMode="email"
             aria-label="Email para alertas"
-            style={{ display: 'block', width: '100%', marginBottom: 8, padding: 8, background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text)' }}
+            style={{ display: 'block', width: '100%', marginBottom: 10, padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#f5f5f7', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
           />
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn" onClick={saveProfile} style={{ flex: 1 }}>
+            <button onClick={saveProfile} style={{ flex: 1, padding: '10px 14px', background: '#f5f5f7', border: 'none', borderRadius: 10, color: '#0d0d0f', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
               💾 Guardar cuenta
             </button>
             {profile && (
-              <button className="btn" onClick={clearProfile} title="Borra tu cuenta de este navegador">
+              <button onClick={clearProfile} title="Borra tu cuenta de este navegador" style={{ padding: '10px 14px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, color: '#a1a1a6', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
                 🗑 Salir
               </button>
             )}
           </div>
-          {authMsg && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>{authMsg}</div>}
+          {authMsg && <div style={{ fontSize: 12, color: '#a1a1a6', marginTop: 8 }}>{authMsg}</div>}
         </div>
 
         <div style={{ fontSize: 13, marginTop: 8 }}>

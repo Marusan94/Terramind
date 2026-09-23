@@ -57,3 +57,22 @@ export function clearAuth(): void {
 export function isValidEmail(e: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
 }
+
+const PROMPT_KEY = 'terramind.auth.prompted.v1';
+
+/** ¿Ya se le sugirió registrarse al entrar? (para no insistir). */
+export function hasSeenAuthPrompt(): boolean {
+  try {
+    return localStorage?.getItem(PROMPT_KEY) === '1';
+  } catch {
+    return true;
+  }
+}
+
+export function markAuthPromptSeen(): void {
+  try {
+    localStorage?.setItem(PROMPT_KEY, '1');
+  } catch {
+    // sin almacenamiento: no se vuelve a sugerir en la sesión
+  }
+}

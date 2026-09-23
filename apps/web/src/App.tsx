@@ -10,6 +10,8 @@ import RagLibrary from './components/RagLibrary';
 import AirQualityOverview from './components/AirQualityOverview';
 import ChatWidget from './components/ChatWidget';
 import AlertsPanel from './components/AlertsPanel';
+import AuthPrompt from './components/AuthPrompt';
+import { hasSeenAuthPrompt, loadAuth } from './services/auth';
 import { GraphModal, ArchitectureModal } from './components/SystemViews';
 import { AIR_QUALITY_STATIONS, generateRealisticData, calculateAQI } from './data/stations';
 import { loadValleyData, ValleyData } from './services/valley';
@@ -57,6 +59,15 @@ export default function App() {
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
   const [archOpen, setArchOpen] = useState(false);
+  // Sugerencia de registro: una sola vez, solo si no tiene cuenta.
+  const [authPromptOpen, setAuthPromptOpen] = useState(false);
+
+  useEffect(() => {
+    if (!hasSeenAuthPrompt() && !loadAuth()) {
+      const t = window.setTimeout(() => setAuthPromptOpen(true), 1200);
+      return () => window.clearTimeout(t);
+    }
+  }, []);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState('');
@@ -405,6 +416,12 @@ export default function App() {
         {ragOpen && <RagLibrary onClose={() => setRagOpen(false)} />}
         {graphOpen && <GraphModal onClose={() => setGraphOpen(false)} />}
         {archOpen && <ArchitectureModal onClose={() => setArchOpen(false)} />}
+        {authPromptOpen && (
+          <AuthPrompt
+            onRegister={() => { setAuthPromptOpen(false); setAlertsOpen(true); }}
+            onDismiss={() => setAuthPromptOpen(false)}
+          />
+        )}
         <AlertsPanel
           open={alertsOpen}
           onClose={() => setAlertsOpen(false)}

@@ -9,7 +9,7 @@
         "destination": "https://calendar-ia.onrender.com/api/v1/:path*"
     },
     {
-      "source": "/((?!api/|assets/|favicon.svg|manifest.json|sw.js|icon-.*|screenshot\\.png|apple-touch-icon\\.png).*)",
+      "source": "/((?!api/|assets/|system/|favicon.svg|manifest.json|sw.js|icon-.*|screenshot\\.png|apple-touch-icon\\.png).*)",
       "destination": "/index.html"
     }
   ],

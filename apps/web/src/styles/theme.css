@@ -68,7 +68,9 @@ html, body {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
   transition: width 0.2s ease, min-width 0.2s ease;
 }
 
@@ -1121,6 +1123,27 @@ body.command-mode .cmd-title {
   padding: 0 16px;
   margin-top: 6px;
   line-height: 1.5;
+}
+
+/* ============================================================
+ * PANTALLAS BAJAS (laptops 768px o menos): compacta el sidebar
+ * para que los botones se vean sin hacer zoom.
+ * ============================================================ */
+@media (max-height: 820px) {
+  .sidebar-header { padding: 10px 12px; }
+  .sidebar-logo { width: 26px; height: 26px; font-size: 12px; }
+  .sidebar-title { font-size: 13px; }
+  .badges { padding: 8px 12px; gap: 6px; }
+  .badge { padding: 4px 10px; font-size: 11px; }
+  .section { padding: 8px 12px 4px; }
+  .layers { gap: 2px; }
+  .layer { padding: 7px 10px; }
+  .layer-icon { font-size: 14px; }
+  .layer-name { font-size: 12px; }
+  .actions { gap: 6px; padding: 8px 12px; }
+  .btn { padding: 8px 12px; font-size: 11px; }
+  .connection { padding: 8px 12px; }
+  .sidebar-source { display: none; }
 }
 
 /* ============================================================
