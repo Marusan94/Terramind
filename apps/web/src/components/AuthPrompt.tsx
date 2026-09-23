@@ -116,7 +116,7 @@ export default function AuthPrompt({ onRegister, onDismiss }: Props) {
 
   return (
     <div style={overlay} onClick={close(onDismiss)}>
-      <div role="dialog" aria-label="Accede a tu espacio" onClick={e => e.stopPropagation()} style={card} className="mac-pop auth-split">
+      <div role="dialog" aria-label="Registro para alertas" onClick={e => e.stopPropagation()} style={card} className="mac-pop auth-split">
         <button
           onClick={close(onDismiss)}
           aria-label="Cerrar"
@@ -145,10 +145,10 @@ export default function AuthPrompt({ onRegister, onDismiss }: Props) {
           </div>
 
           <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 6 }}>
-            Accede a tu espacio
+            ¿Quieres recibir alertas de Terramind a tu correo?
           </div>
           <div style={{ fontSize: 13.5, lineHeight: 1.55, color: '#a1a1a6', marginBottom: 20 }}>
-            Alertas, visualización y datos del Valle en un solo lugar.
+            Regístrate y te avisamos cuando la calidad del aire supere tu umbral.
           </div>
 
           <label style={label} htmlFor="auth-name">Tu nombre</label>
@@ -182,7 +182,7 @@ export default function AuthPrompt({ onRegister, onDismiss }: Props) {
           </label>
 
           <button onClick={submit} className="mac-btn-primary" style={cream}>
-            Crear cuenta
+            Regístrate
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '14px 0', color: '#636366', fontSize: 12 }}>
