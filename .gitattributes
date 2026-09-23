@@ -1,0 +1,7 @@
+# GitHub language stats: docs y datos son documentacion, no codigo.
+# Sin esto, los HTML grandes de docs/ hacen que GitHub reporte "HTML"
+# como lenguaje principal en vez de TypeScript/Python.
+docs/** linguist-documentation
+data/** linguist-documentation
+*.pdf linguist-documentation
+chart-examples/** linguist-documentation
