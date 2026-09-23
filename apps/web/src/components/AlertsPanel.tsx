@@ -14,6 +14,7 @@ import {
   saveAlerts,
   thresholdLabel,
 } from '../services/alerts';
+import { clearAuth, isValidEmail, loadAuth, saveAuth, type AuthProfile } from '../services/auth';
 
 interface Props {
   open: boolean;
@@ -32,11 +33,21 @@ export default function AlertsPanel({ open, onClose, avgAqi, stations, source, d
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported',
   );
   const [saved, setSaved] = useState(false);
+  // Cuenta opcional: solo personaliza las alertas, no bloquea nada.
+  const [profile, setProfile] = useState<AuthProfile | null>(null);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [authMsg, setAuthMsg] = useState('');
 
   useEffect(() => {
     if (open) {
       setCfg(loadAlerts());
       setSaved(false);
+      const p = loadAuth();
+      setProfile(p);
+      setName(p?.displayName ?? '');
+      setEmail(p?.email ?? '');
+      setAuthMsg('');
       if (typeof Notification !== 'undefined') setPerm(Notification.permission);
     }
   }, [open ]);
@@ -49,6 +60,29 @@ export default function AlertsPanel({ open, onClose, avgAqi, stations, source, d
 
   const isDemo = /simulado|demo/i.test(source);
   const hits = evaluateAlerts(stations, avgAqi, { ...cfg, enabled: true });
+
+  const saveProfile = () => {
+    if (!isValidEmail(email)) {
+      setAuthMsg('Escribe un email válido para guardar tu cuenta.');
+      return;
+    }
+    const p = saveAuth({
+      displayName: name,
+      email,
+      wantsAlerts: true,
+      createdAt: profile?.createdAt,
+    });
+    setProfile(p);
+    setAuthMsg(`✓ Cuenta guardada: avisaremos a ${p.email}.`);
+  };
+
+  const clearProfile = () => {
+    clearAuth();
+    setProfile(null);
+    setName('');
+    setEmail('');
+    setAuthMsg('Cuenta eliminada de este navegador.');
+  };
 
   const toggle = async () => {
     const next = { ...cfg, enabled: !cfg.enabled };
@@ -127,6 +161,39 @@ export default function AlertsPanel({ open, onClose, avgAqi, stations, source, d
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
           Notificaciones del navegador: <strong>{perm}</strong>
           {perm !== 'granted' && perm !== 'unsupported' && ' (se piden al activar)'}
+        </div>
+
+        <div style={{ borderTop: '1px solid var(--border)', marginTop: 12, paddingTop: 12, marginBottom: 4 }}>
+          <strong style={{ fontSize: 13 }}>👤 Cuenta (opcional)</strong>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 8px' }}>
+            Solo para avisarte por email cuando haya alertas. Sin cuenta todo sigue funcionando.
+          </div>
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="Tu nombre"
+            aria-label="Nombre"
+            style={{ display: 'block', width: '100%', marginBottom: 6, padding: 8, background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text)' }}
+          />
+          <input
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="tu@email.com"
+            inputMode="email"
+            aria-label="Email para alertas"
+            style={{ display: 'block', width: '100%', marginBottom: 8, padding: 8, background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text)' }}
+          />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn" onClick={saveProfile} style={{ flex: 1 }}>
+              💾 Guardar cuenta
+            </button>
+            {profile && (
+              <button className="btn" onClick={clearProfile} title="Borra tu cuenta de este navegador">
+                🗑 Salir
+              </button>
+            )}
+          </div>
+          {authMsg && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>{authMsg}</div>}
         </div>
 
         <div style={{ fontSize: 13, marginTop: 8 }}>

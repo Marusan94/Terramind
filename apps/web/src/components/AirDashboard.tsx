@@ -133,7 +133,7 @@ function downloadCsv(filename: string, rows: string[][]) {
 const TH = { textAlign: 'left' as const, padding: 8, color: 'var(--text-muted)' };
 const THC = { textAlign: 'center' as const, padding: 8, color: 'var(--text-muted)' };
 
-export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley = null, airQualityData, onConfigureAlerts, onShare }: AirDashboardProps) {
+export default function AirDashboard({ onClose, layers = ALL_LAYERS_ON, valley = null, onConfigureAlerts, onShare }: AirDashboardProps) {
   const [tab, setTab] = useState<TabKey>('overview');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);

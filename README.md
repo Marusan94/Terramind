@@ -18,6 +18,10 @@
 
 ## 📸 Capturas
 
+![Terramind Mapa actual](./docs/screenshots/Captura%200.png)
+
+*Vista actual del mapa 3D: AQI del Valle con tarjeta de resumen, capas activas (aire, clima, agua, vegetación, comunas), edificios extruidos y panel de acciones.*
+
 ![Terramind Mapa](./docs/screenshots/home-mapa.png)
 
 *Mapa 3D del Valle de Aburrá con comunas coloreadas por AQI, estaciones de calidad del aire (PM2.5/PM10), niveles de agua y copiloto de IA respondiendo en vivo.*

@@ -10,14 +10,15 @@ import RagLibrary from './components/RagLibrary';
 import AirQualityOverview from './components/AirQualityOverview';
 import ChatWidget from './components/ChatWidget';
 import AlertsPanel from './components/AlertsPanel';
+import { GraphModal, ArchitectureModal } from './components/SystemViews';
 import { AIR_QUALITY_STATIONS, generateRealisticData, calculateAQI } from './data/stations';
-import { loadValleyData, ValleyData, ValleyStation } from './services/valley';
+import { loadValleyData, ValleyData } from './services/valley';
 import { LayerState, ALL_LAYERS_ON } from './layers';
 import { estimateMixingHeightM, mixingState, demoSmokeFoci, trajectory } from './services/intelligence';
 import type { SmokeFocus } from './services/intelligence';
 import { loadFireFoci } from './services/fires';
 import { shareReport, type ShareSnapshot } from './services/share';
-import { loadAlerts, evaluateAlerts, requestNotifyPermission, maybeNotify, type AlertConfig, type StationLike } from './services/alerts';
+import { loadAlerts, evaluateAlerts, maybeNotify, type StationLike } from './services/alerts';
 import './styles/theme.css';
 
 if ('serviceWorker' in navigator) {
@@ -54,6 +55,8 @@ export default function App() {
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [ragOpen, setRagOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
+  const [graphOpen, setGraphOpen] = useState(false);
+  const [archOpen, setArchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState('');
@@ -134,7 +137,7 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setDashboardOpen(false); setRagOpen(false); }
+      if (e.key === 'Escape') { setDashboardOpen(false); setRagOpen(false); setAlertsOpen(false); setGraphOpen(false); setArchOpen(false); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -200,9 +203,9 @@ export default function App() {
     return { mixingLabel: mixingM + ' m · ' + ms.label, smoke, smokeReal: fires !== null };
   }, [fires]);
 
-  // Alerta de lluvia real desde Open-Meteo o medidores
+  // Alerta de lluvia: probabilidad alta en Open-Meteo o medidores en alerta
   const hasRainAlert = Boolean(
-    valley?.weather?.alerts?.length ||
+    (valley?.weather?.precipProb ?? 0) >= 70 ||
     valley?.gauges?.some(g => g.alert)
   );
 
@@ -306,6 +309,12 @@ export default function App() {
           <button className="btn" onClick={() => setRagOpen(true)} title="Biblioteca documental ambiental con citas">
             📚 RAG Documental
           </button>
+          <button className="btn" onClick={() => setGraphOpen(true)} title="Mapa del código: qué usa qué (Graphify)">
+            🧠 Grafo conocimiento
+          </button>
+          <button className="btn" onClick={() => setArchOpen(true)} title="Diagrama de arquitectura del sistema (Archify)">
+            🏗 Arquitectura
+          </button>
           <button className="btn" onClick={() => setAlertsOpen(true)}>
             🔔 Configurar Alertas
           </button>
@@ -394,6 +403,8 @@ export default function App() {
         {/* Dashboard overlay */}
         {dashboardOpen && <AirDashboard onClose={() => setDashboardOpen(false)} layers={layers} valley={valley} airQualityData={{ aqi: stats.avgAqi, pm25: stats.avgPm25, category: stats.category }} onConfigureAlerts={() => { setDashboardOpen(false); setAlertsOpen(true); }} onShare={handleShare} />}
         {ragOpen && <RagLibrary onClose={() => setRagOpen(false)} />}
+        {graphOpen && <GraphModal onClose={() => setGraphOpen(false)} />}
+        {archOpen && <ArchitectureModal onClose={() => setArchOpen(false)} />}
         <AlertsPanel
           open={alertsOpen}
           onClose={() => setAlertsOpen(false)}

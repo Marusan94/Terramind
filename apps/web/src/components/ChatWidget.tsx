@@ -274,6 +274,12 @@ interface ChatPos {
 }
 
 const CHAT_POS_KEY = 'terramind-chat-pos';
+const SMALL_SCREEN_PX = 768;
+
+/** En pantallas pequeñas el chat va anclado abajo: se ignora lo guardado. */
+export function isSmallScreen(): boolean {
+  return typeof window !== 'undefined' && window.innerWidth < SMALL_SCREEN_PX;
+}
 
 /** Constriñe la posición al viewport para que el widget nunca se pierda. */
 export function clampChatPos(p: ChatPos, w = 380, h = 120): ChatPos {
@@ -289,6 +295,7 @@ export function clampChatPos(p: ChatPos, w = 380, h = 120): ChatPos {
 
 export function loadChatPos(): ChatPos | null {
   try {
+    if (isSmallScreen()) return null;
     const raw = localStorage.getItem(CHAT_POS_KEY);
     if (!raw) return null;
     const p = JSON.parse(raw) as Partial<ChatPos>;
@@ -398,9 +405,16 @@ export default function ChatWidget({
     };
   }, [dragging]);
 
-  // Re-constreñir si el viewport cambia (la posición guardada puede quedar fuera)
+  // Re-constreñir si el viewport cambia; en móvil se vuelve al anclaje
+  // por defecto para que el chat nunca quede fuera de foco.
   useEffect(() => {
-    const onResize = () => setPos(prev => (prev ? clampChatPos(prev) : prev));
+    const onResize = () => {
+      if (isSmallScreen()) {
+        setPos(null);
+        return;
+      }
+      setPos(prev => (prev ? clampChatPos(prev) : prev));
+    };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
@@ -434,11 +448,26 @@ export default function ChatWidget({
       suppressToggleClick.current = false;
       return;
     }
+    // Al abrir, garantiza espacio hacia arriba: si el panel (~520px + botón)
+    // quedaría cortado por el borde superior, sube el widget antes de abrir.
+    if (!isOpen && pos && !isSmallScreen()) {
+      const need = 520 + 90;
+      const vh = window.innerHeight || 768;
+      if (pos.top + need > vh) {
+        const next = clampChatPos({ left: pos.left, top: Math.max(8, vh - need) }, 380, 120);
+        setPos(next);
+        try {
+          localStorage.setItem(CHAT_POS_KEY, JSON.stringify(next));
+        } catch {
+          // sin almacenamiento: la posición igual aplica en sesión
+        }
+      }
+    }
     setIsOpen(v => !v);
   };
 
-  // Si el widget quedó arriba, el panel abre hacia abajo para no salirse
-  const panelBelow = pos !== null && pos.top < 480;
+  // El panel abre SIEMPRE hacia arriba (anclado con bottom por CSS):
+  // nunca se abre hacia abajo ni queda fuera de foco.
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -692,11 +721,8 @@ export default function ChatWidget({
       ref={widgetRef}
       style={pos ? { left: pos.left, top: pos.top, right: 'auto', bottom: 'auto' } : undefined}
     >
-      {/* Chat Panel */}
-      <div
-        className={`chat-panel ${isOpen ? '' : 'hidden'}`}
-        style={panelBelow ? { top: 70, bottom: 'auto' } : undefined}
-      >
+      {/* Chat Panel: siempre abre hacia arriba (bottom anclado por CSS) */}
+      <div className={`chat-panel ${isOpen ? '' : 'hidden'}`}>
         {/* Header */}
         <div className="chat-header" onMouseDown={onHeaderMouseDown} title="Arrastra para mover">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

@@ -1122,3 +1122,137 @@ body.command-mode .cmd-title {
   margin-top: 6px;
   line-height: 1.5;
 }
+
+/* ============================================================
+ * MODALES LIGEROS (AlertsPanel, AirQualityDashboard, SystemViews)
+ * ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* ============================================================
+ * MÓVIL — evita pantalla en blanco y layout roto
+ * - 100dvh (la barra del navegador móvil cambia el 100vh clásico)
+ * - sidebar como drawer superpuesto, no empuja el mapa
+ * - chat siempre abre hacia ARRIBA como hoja inferior
+ * ============================================================ */
+.app {
+  height: 100dvh;
+}
+
+@media (max-width: 768px) {
+  .app {
+    position: relative;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 800;
+    width: min(300px, 84vw);
+    min-width: 0;
+    height: 100dvh;
+    transform: translateX(0);
+    transition: transform 0.22s ease;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.5);
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-105%);
+    width: min(300px, 84vw);
+    border-right-color: var(--border);
+    box-shadow: none;
+  }
+
+  .main {
+    width: 100%;
+  }
+
+  .aqi-overview {
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+    left: 12px;
+    right: 12px;
+    top: 12px;
+  }
+
+  .main.full .aqi-overview {
+    left: 56px;
+    max-width: calc(100vw - 68px);
+  }
+
+  .hud,
+  .hud-coords {
+    display: none;
+  }
+
+  .weather-chip {
+    top: auto;
+    bottom: 96px;
+    font-size: 11px;
+    max-width: calc(100vw - 24px);
+    white-space: normal;
+    text-align: center;
+  }
+
+  .legend {
+    bottom: auto;
+    top: 120px;
+    padding: 8px;
+  }
+
+  /* Chat: anclado abajo, panel SIEMPRE hacia arriba */
+  .chat-widget {
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    align-items: stretch;
+  }
+
+  .chat-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 68px;
+    top: auto;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    max-height: 70dvh;
+    resize: none;
+  }
+
+  .chat-messages {
+    min-height: 200px;
+    max-height: 46dvh;
+  }
+
+  .chat-toggle {
+    align-self: flex-end;
+  }
+
+  .dashboard-view {
+    width: 94vw;
+    max-height: 88dvh;
+    padding: 14px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+}

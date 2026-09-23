@@ -1,8 +1,17 @@
 /** Posición persistente del chat: clamp al viewport + restore de localStorage. */
-import { describe, it, expect, beforeEach } from 'vitest';
-import { clampChatPos, loadChatPos } from '../components/ChatWidget';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { clampChatPos, isSmallScreen, loadChatPos } from '../components/ChatWidget';
 
 const KEY = 'terramind-chat-pos';
+const REAL_WIDTH = window.innerWidth;
+
+function setWidth(w: number) {
+  Object.defineProperty(window, 'innerWidth', { value: w, configurable: true });
+}
+
+afterEach(() => {
+  setWidth(REAL_WIDTH);
+});
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -35,5 +44,19 @@ describe('loadChatPos', () => {
     expect(loadChatPos()).toBeNull();
     window.localStorage.setItem(KEY, JSON.stringify({ left: 'x' }));
     expect(loadChatPos()).toBeNull();
+  });
+
+  it('en móvil ignora lo guardado (chat anclado, abre hacia arriba)', () => {
+    window.localStorage.setItem(KEY, JSON.stringify({ left: 120, top: 200 }));
+    setWidth(390);
+    expect(isSmallScreen()).toBe(true);
+    expect(loadChatPos()).toBeNull();
+  });
+
+  it('en escritorio sí restaura', () => {
+    window.localStorage.setItem(KEY, JSON.stringify({ left: 120, top: 200 }));
+    setWidth(1280);
+    expect(isSmallScreen()).toBe(false);
+    expect(loadChatPos()).toEqual({ left: 120, top: 200 });
   });
 });
