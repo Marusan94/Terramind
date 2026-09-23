@@ -1366,3 +1366,18 @@ body.command-mode .cmd-title {
 }
 
 .mac-input::placeholder { color: #6e6e73; }
+
+/* ============================================================
+ * AUTH SPLIT (AuthPrompt): formulario opaco + foto del Valle.
+ * En móvil se apila con la foto arriba en franja.
+ * ============================================================ */
+.auth-photo { min-height: 420px; }
+
+@media (max-width: 640px) {
+  .auth-split { flex-direction: column; }
+  .auth-split .auth-photo {
+    order: -1;
+    min-height: 150px;
+    flex: none;
+  }
+}
