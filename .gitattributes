@@ -1,7 +1,20 @@
-# GitHub language stats: docs y datos son documentacion, no codigo.
-# Sin esto, los HTML grandes de docs/ hacen que GitHub reporte "HTML"
-# como lenguaje principal en vez de TypeScript/Python.
+# GitHub language stats.
+# Objetivo: que GitHub reporte el stack real (TypeScript + Python), no HTML.
+# Sin estas reglas, los diagramas estaticos generados pesan mas que todo el
+# codigo fuente y GitHub muestra "HTML" como lenguaje principal.
+
+# Documentacion: PDF, HTML y corpus normativo del RAG.
 docs/** linguist-documentation
 data/** linguist-documentation
-*.pdf linguist-documentation
 chart-examples/** linguist-documentation
+*.pdf linguist-documentation
+
+# Diagramas estaticos generados (arquitectura y grafo 3D) que viven en public/.
+# Son artefactos de documentacion, no codigo de la aplicacion.
+apps/web/public/system/** linguist-documentation
+
+# Imagenes y dependencias generadas: no cuentan para el stack.
+*.png linguist-documentation
+*.jpg linguist-documentation
+package-lock.json linguist-vendored
+**/package-lock.json linguist-vendored
