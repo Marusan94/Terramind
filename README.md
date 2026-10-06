@@ -14,6 +14,16 @@
   </p>
 </p>
 
+## 🧭 El proyecto en breve
+
+**Copiloto IA sobre datos ambientales en vivo**
+
+- **Problema:** Los datos de calidad del aire existen pero nadie los entiende.
+- **Automatización:** Mapa 3D que se actualiza solo + copiloto multi-LLM con RAG normativo: preguntas en español, responde con fuentes.
+- **Resultado:** Cualquiera consulta el aire de su ciudad sin saber de datos.
+
+`React` · `FastAPI` · `PostGIS` · `RAG` — [Demo →](https://terramind-mu.vercel.app) · [Código →](https://github.com/Marusan94/Terramind)
+
 ## Table of Contents
 
 - [Screenshots](#-screenshots)
