@@ -199,6 +199,19 @@ PostGIS + Redis     SIATA / Open-Meteo    Tile cache
 
 Fork → branch (`feat/map: ...`) → `npm test` + `pytest` → PR with screenshots for UI changes. See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+## 🎮 Demo en vivo
+
+[https://terramind-mu.vercel.app](https://terramind-mu.vercel.app) — modo demo sin API keys (datos simulados determinísticos). Con keys (Gemini/Groq) → copilot + RAG real.
+
+## 🔧 Casos de uso
+
+| Perfil | Qué haces |
+|--------|-----------|
+| **Ciudadano** | Abre el mapa → ve AQI de su comuna → consulta pronóstico → pregunta al copilot |
+| **Analista ambiental** | Filtra estaciones SIATA → series históricas PM2.5/PM10 → exporta datos |
+| **Investigador** | RAG documental: pregunta por normativa colombiana (Decreto 1076, Res 2254) → citas con fuentes |
+| **Desarrollador** | API REST `/api/v1` (copilot, spatial, health, rag) + docs Swagger en `/docs` |
+
 ## 📜 License
 
 Apache-2.0 — see [LICENSE](./LICENSE). Data: **SIATA** (Área Metropolitana del Valle de Aburrá) · **Open-Meteo** · **RainViewer** · **OpenStreetMap** · **MapLibre** · **deck.gl**.
